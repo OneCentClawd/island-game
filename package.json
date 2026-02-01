@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "build:wx": "bash build-wx.sh",
+    "build:wx": "node build-wx.js",
     "preview": "vite preview",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
