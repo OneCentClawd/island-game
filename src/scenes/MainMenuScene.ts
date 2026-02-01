@@ -46,22 +46,31 @@ export class MainMenuScene extends Phaser.Scene {
     }).setOrigin(0.5);
 
     // 开始游戏按钮（关卡选择）
-    this.createButton(centerX, 520, '🎮 开始游戏', () => {
+    this.createButton(centerX, 500, '🎮 开始游戏', () => {
       this.scene.start('LevelSelectScene');
     });
 
     // 进入小岛按钮
-    this.createButton(centerX, 610, '🏝️ 我的小岛', () => {
+    this.createButton(centerX, 580, '🏝️ 我的小岛', () => {
       this.scene.start('IslandScene');
     });
 
-    // 成就按钮
-    this.createButton(centerX, 700, '🏆 成就', () => {
+    // 每日任务
+    this.createButton(centerX, 660, '📋 每日任务', () => {
+      this.scene.start('DailyTaskScene');
+    });
+
+    // 商店
+    this.createButton(centerX, 740, '🛒 商店', () => {
+      this.scene.start('ShopScene');
+    });
+
+    // 右上角成就和设置图标
+    this.createIconButton(GameConfig.WIDTH - 100, 100, '🏆', () => {
       this.scene.start('AchievementScene');
     });
 
-    // 设置按钮
-    this.createButton(centerX, 790, '⚙️ 设置', () => {
+    this.createIconButton(GameConfig.WIDTH - 50, 100, '⚙️', () => {
       this.showSettings();
     });
 
@@ -69,10 +78,29 @@ export class MainMenuScene extends Phaser.Scene {
     this.showResources();
 
     // 版本信息
-    this.add.text(centerX, GameConfig.HEIGHT - 50, 'v0.2.0 - 开发中', {
+    this.add.text(centerX, GameConfig.HEIGHT - 50, 'v0.3.0 - 开发中', {
       fontSize: '16px',
       color: '#ffffff',
     }).setOrigin(0.5).setAlpha(0.7);
+  }
+
+  private createIconButton(x: number, y: number, icon: string, callback: () => void): void {
+    const btn = this.add.text(x, y, icon, {
+      fontSize: '36px',
+    }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+
+    btn.on('pointerup', () => {
+      this.audioManager.playClick();
+      callback();
+    });
+
+    btn.on('pointerover', () => {
+      btn.setScale(1.2);
+    });
+
+    btn.on('pointerout', () => {
+      btn.setScale(1);
+    });
   }
 
   private createButton(x: number, y: number, text: string, callback: () => void): void {

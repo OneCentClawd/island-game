@@ -383,6 +383,189 @@ export class SaveManager {
     this.data.tutorialCompleted = true;
     this.save();
   }
+
+  // ============ 每日任务相关 ============
+
+  /**
+   * 获取每日任务进度
+   */
+  getDailyTaskProgress(): any {
+    const today = new Date().toISOString().split('T')[0];
+    const saved = localStorage.getItem('island_daily_tasks');
+    
+    if (saved) {
+      const data = JSON.parse(saved);
+      if (data.date === today) {
+        return data;
+      }
+    }
+    
+    // 新的一天，重置进度
+    return { date: today, tasks: {}, bonusClaimed: false };
+  }
+
+  /**
+   * 更新每日任务进度
+   */
+  updateDailyTaskProgress(taskId: string, amount: number): void {
+    const progress = this.getDailyTaskProgress();
+    if (!progress.tasks[taskId]) {
+      progress.tasks[taskId] = { progress: 0, claimed: false };
+    }
+    progress.tasks[taskId].progress += amount;
+    localStorage.setItem('island_daily_tasks', JSON.stringify(progress));
+  }
+
+  /**
+   * 领取每日任务奖励
+   */
+  claimDailyTask(taskId: string): void {
+    const progress = this.getDailyTaskProgress();
+    if (progress.tasks[taskId]) {
+      progress.tasks[taskId].claimed = true;
+      localStorage.setItem('island_daily_tasks', JSON.stringify(progress));
+    }
+  }
+
+  /**
+   * 领取每日全部完成奖励
+   */
+  claimDailyBonus(): void {
+    const progress = this.getDailyTaskProgress();
+    progress.bonusClaimed = true;
+    localStorage.setItem('island_daily_tasks', JSON.stringify(progress));
+  }
+
+  // ============ 签到相关 ============
+
+  /**
+   * 获取签到连续天数
+   */
+  getLoginStreak(): { streak: number; lastLogin: string } {
+    const saved = localStorage.getItem('island_login_streak');
+    if (saved) {
+      return JSON.parse(saved);
+    }
+    return { streak: 0, lastLogin: '' };
+  }
+
+  /**
+   * 领取每日签到
+   */
+  claimDailyLogin(): number {
+    const data = this.getLoginStreak();
+    const today = new Date().toDateString();
+    const yesterday = new Date(Date.now() - 86400000).toDateString();
+
+    if (data.lastLogin === yesterday) {
+      // 连续签到
+      data.streak += 1;
+    } else if (data.lastLogin !== today) {
+      // 断签或首次
+      data.streak = 1;
+    }
+
+    data.lastLogin = today;
+    localStorage.setItem('island_login_streak', JSON.stringify(data));
+    return data.streak;
+  }
+
+  // ============ 商店相关 ============
+
+  /**
+   * 获取物品今日购买次数
+   */
+  getItemPurchaseCount(itemId: string): number {
+    const today = new Date().toISOString().split('T')[0];
+    const saved = localStorage.getItem('island_shop_purchases');
+    
+    if (saved) {
+      const data = JSON.parse(saved);
+      if (data.date === today) {
+        return data.items[itemId] || 0;
+      }
+    }
+    return 0;
+  }
+
+  /**
+   * 记录物品购买
+   */
+  recordItemPurchase(itemId: string): void {
+    const today = new Date().toISOString().split('T')[0];
+    let data = { date: today, items: {} as any };
+    
+    const saved = localStorage.getItem('island_shop_purchases');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (parsed.date === today) {
+        data = parsed;
+      }
+    }
+    
+    data.items[itemId] = (data.items[itemId] || 0) + 1;
+    localStorage.setItem('island_shop_purchases', JSON.stringify(data));
+  }
+
+  /**
+   * 添加体力（可超过上限）
+   */
+  addEnergy(amount: number): void {
+    this.data.energy = Math.min(999, this.data.energy + amount);
+    this.save();
+  }
+
+  /**
+   * 设置无限体力
+   */
+  setUnlimitedEnergy(minutes: number): void {
+    const expireTime = Date.now() + minutes * 60 * 1000;
+    localStorage.setItem('island_unlimited_energy', expireTime.toString());
+  }
+
+  /**
+   * 检查是否有无限体力
+   */
+  hasUnlimitedEnergy(): boolean {
+    const saved = localStorage.getItem('island_unlimited_energy');
+    if (saved) {
+      const expireTime = parseInt(saved);
+      return Date.now() < expireTime;
+    }
+    return false;
+  }
+
+  // ============ 背包相关 ============
+
+  /**
+   * 添加道具到背包
+   */
+  addInventoryItem(type: string, amount: number): void {
+    const inventory = this.getInventory();
+    inventory[type] = (inventory[type] || 0) + amount;
+    localStorage.setItem('island_inventory', JSON.stringify(inventory));
+  }
+
+  /**
+   * 使用背包道具
+   */
+  useInventoryItem(type: string, amount: number = 1): boolean {
+    const inventory = this.getInventory();
+    if ((inventory[type] || 0) >= amount) {
+      inventory[type] -= amount;
+      localStorage.setItem('island_inventory', JSON.stringify(inventory));
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * 获取背包
+   */
+  getInventory(): { [type: string]: number } {
+    const saved = localStorage.getItem('island_inventory');
+    return saved ? JSON.parse(saved) : {};
+  }
 }
 
 // 单例

@@ -6,6 +6,8 @@ import { LevelSelectScene } from './scenes/LevelSelectScene';
 import { Match3Scene } from './scenes/Match3Scene';
 import { IslandScene } from './scenes/IslandScene';
 import { AchievementScene } from './scenes/AchievementScene';
+import { DailyTaskScene } from './scenes/DailyTaskScene';
+import { ShopScene } from './scenes/ShopScene';
 import { GameConfig } from './config/GameConfig';
 
 const config: Phaser.Types.Core.GameConfig = {
@@ -18,7 +20,7 @@ const config: Phaser.Types.Core.GameConfig = {
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
   },
-  scene: [BootScene, PreloadScene, MainMenuScene, LevelSelectScene, Match3Scene, IslandScene, AchievementScene],
+  scene: [BootScene, PreloadScene, MainMenuScene, LevelSelectScene, Match3Scene, IslandScene, AchievementScene, DailyTaskScene, ShopScene],
 };
 
 new Phaser.Game(config);
