@@ -31,6 +31,7 @@ console.log('\n📋 复制配置文件...');
 fs.copyFileSync('wx-template/game.json', 'dist-wx/game.json');
 fs.copyFileSync('wx-template/app.json', 'dist-wx/app.json');
 fs.copyFileSync('wx-template/project.config.json', 'dist-wx/project.config.json');
+fs.copyFileSync('wx-template/project.private.config.json', 'dist-wx/project.private.config.json');
 
 // 复制 Phaser 库
 console.log('📚 复制 Phaser 库...');
