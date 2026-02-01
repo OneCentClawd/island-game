@@ -7,10 +7,10 @@
     "doc": "docs"
   },
   "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
+    "dev": "npx vite",
+    "build": "npx tsc && npx vite build",
     "build:wx": "node build-wx.js",
-    "preview": "vite preview",
+    "preview": "npx vite preview",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": ["game", "match3", "island", "casual"],

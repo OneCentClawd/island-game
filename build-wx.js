@@ -20,7 +20,7 @@ dirs.forEach(dir => {
 // 先构建 Web 版本
 console.log('📦 构建游戏代码...');
 try {
-  execSync('npm run build', { stdio: 'inherit' });
+  execSync('npx tsc && npx vite build', { stdio: 'inherit', shell: true });
 } catch (e) {
   console.error('构建失败！');
   process.exit(1);
