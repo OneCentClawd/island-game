@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { GameConfig } from '../config/GameConfig';
+import { AssetGenerator } from '../utils/AssetGenerator';
 
 /**
  * 预加载场景 - 加载游戏资源并显示进度条
@@ -12,9 +13,6 @@ export class PreloadScene extends Phaser.Scene {
   preload(): void {
     // 创建加载进度UI
     this.createLoadingUI();
-
-    // 由于目前没有美术资源，我们先生成简单的几何图形作为占位符
-    this.generatePlaceholderAssets();
   }
 
   private createLoadingUI(): void {
@@ -29,7 +27,7 @@ export class PreloadScene extends Phaser.Scene {
     }).setOrigin(0.5);
 
     // 加载提示
-    const loadingText = this.add.text(centerX, centerY + 50, '加载中...', {
+    this.add.text(centerX, centerY + 50, '加载中...', {
       fontSize: '24px',
       color: '#ffffff',
     }).setOrigin(0.5);
@@ -39,36 +37,55 @@ export class PreloadScene extends Phaser.Scene {
     progressBarBg.fillStyle(0x222222, 0.8);
     progressBarBg.fillRoundedRect(centerX - 150, centerY, 300, 30, 15);
 
-    // 进度条
+    // 进度条 - 模拟加载
     const progressBar = this.add.graphics();
+    let progress = 0;
 
-    this.load.on('progress', (value: number) => {
-      progressBar.clear();
-      progressBar.fillStyle(0xffe66d, 1);
-      progressBar.fillRoundedRect(centerX - 145, centerY + 5, 290 * value, 20, 10);
-      loadingText.setText(`加载中... ${Math.floor(value * 100)}%`);
+    this.time.addEvent({
+      delay: 20,
+      repeat: 50,
+      callback: () => {
+        progress += 0.02;
+        progressBar.clear();
+        progressBar.fillStyle(0xffe66d, 1);
+        progressBar.fillRoundedRect(centerX - 145, centerY + 5, 290 * Math.min(progress, 1), 20, 10);
+      }
     });
   }
 
-  private generatePlaceholderAssets(): void {
-    // 生成消除元素的占位图形
-    const elements = [
-      { key: 'wood', color: 0x8B4513, emoji: '🪵' },
-      { key: 'stone', color: 0x808080, emoji: '🪨' },
-      { key: 'coin', color: 0xFFD700, emoji: '💰' },
-      { key: 'star', color: 0xFFFF00, emoji: '⭐' },
-      { key: 'heart', color: 0xFF69B4, emoji: '❤️' },
-      { key: 'diamond', color: 0x00BFFF, emoji: '💎' },
+  create(): void {
+    // 生成所有游戏素材
+    AssetGenerator.generateAll(this);
+
+    // 生成旧版兼容素材（Match3Scene 用的 key）
+    this.generateLegacyAssets();
+
+    // 短暂延迟后进入主菜单
+    this.time.delayedCall(500, () => {
+      this.scene.start('MainMenuScene');
+    });
+  }
+
+  /**
+   * 生成兼容旧代码的素材 key
+   */
+  private generateLegacyAssets(): void {
+    // 消除元素映射到新的宝石
+    const mapping = [
+      { old: 'wood', new: 'gem_red' },
+      { old: 'stone', new: 'gem_blue' },
+      { old: 'coin', new: 'gem_green' },
+      { old: 'star', new: 'gem_yellow' },
+      { old: 'heart', new: 'gem_purple' },
+      { old: 'diamond', new: 'gem_orange' },
     ];
 
-    elements.forEach(({ key, color }) => {
-      const graphics = this.make.graphics({ x: 0, y: 0 });
-      graphics.fillStyle(color, 1);
-      graphics.fillCircle(35, 35, 30);
-      graphics.lineStyle(3, 0xffffff, 1);
-      graphics.strokeCircle(35, 35, 30);
-      graphics.generateTexture(key, 70, 70);
-      graphics.destroy();
+    mapping.forEach(({ old, new: newKey }) => {
+      // 复制纹理
+      if (this.textures.exists(newKey)) {
+        const source = this.textures.get(newKey).getSourceImage();
+        this.textures.addImage(old, source as HTMLImageElement);
+      }
     });
 
     // 生成选中框
@@ -77,26 +94,5 @@ export class PreloadScene extends Phaser.Scene {
     selectGraphics.strokeRoundedRect(2, 2, 76, 76, 10);
     selectGraphics.generateTexture('select', 80, 80);
     selectGraphics.destroy();
-
-    // 生成按钮
-    const buttonGraphics = this.make.graphics({ x: 0, y: 0 });
-    buttonGraphics.fillStyle(0xffe66d, 1);
-    buttonGraphics.fillRoundedRect(0, 0, 200, 60, 15);
-    buttonGraphics.generateTexture('button', 200, 60);
-    buttonGraphics.destroy();
-
-    // 生成面板背景
-    const panelGraphics = this.make.graphics({ x: 0, y: 0 });
-    panelGraphics.fillStyle(0xffffff, 0.95);
-    panelGraphics.fillRoundedRect(0, 0, 300, 200, 20);
-    panelGraphics.generateTexture('panel', 300, 200);
-    panelGraphics.destroy();
-  }
-
-  create(): void {
-    // 短暂延迟后进入主菜单
-    this.time.delayedCall(500, () => {
-      this.scene.start('MainMenuScene');
-    });
   }
 }

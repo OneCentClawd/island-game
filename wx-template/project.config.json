@@ -1,0 +1,36 @@
+{
+  "description": "小岛物语 - 微信小游戏",
+  "packOptions": {
+    "ignore": [
+      { "type": "folder", "value": "node_modules" }
+    ]
+  },
+  "setting": {
+    "urlCheck": false,
+    "es6": true,
+    "enhance": true,
+    "postcss": true,
+    "minified": true,
+    "newFeature": true,
+    "coverView": true,
+    "nodeModules": false,
+    "autoAudits": false,
+    "showShadowRootInWxmlPanel": true,
+    "scopeDataCheck": false,
+    "uglifyFileName": false,
+    "checkInvalidKey": true,
+    "checkSiteMap": true,
+    "uploadWithSourceMap": true,
+    "compileHotReLoad": false,
+    "babelSetting": {
+      "ignore": [],
+      "disablePlugins": [],
+      "outputPath": ""
+    }
+  },
+  "compileType": "game",
+  "libVersion": "3.3.0",
+  "appid": "YOUR_APPID_HERE",
+  "projectname": "island-game",
+  "condition": {}
+}

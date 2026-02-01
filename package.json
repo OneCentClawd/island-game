@@ -1,7 +1,7 @@
 {
   "name": "island-game",
-  "version": "1.0.0",
-  "description": "一款休闲经营类微信小游戏，灵感来源于《逆袭的旅程》。",
+  "version": "0.3.0",
+  "description": "小岛物语 - 一款休闲经营类小游戏",
   "main": "index.js",
   "directories": {
     "doc": "docs"
@@ -9,10 +9,11 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
+    "build:wx": "bash build-wx.sh",
     "preview": "vite preview",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
+  "keywords": ["game", "match3", "island", "casual"],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
