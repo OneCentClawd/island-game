@@ -25,7 +25,11 @@ export interface SaveData {
     totalMatches: number;
     totalScore: number;
     playTime: number; // 秒
+    maxCombo: number;
   };
+  completedDialogs: string[]; // 已完成的剧情对话
+  unlockedAchievements: string[]; // 已解锁的成就
+  tutorialCompleted: boolean; // 是否完成新手引导
 }
 
 export interface BuildingSaveData {
@@ -90,7 +94,11 @@ export class SaveManager {
         totalMatches: 0,
         totalScore: 0,
         playTime: 0,
+        maxCombo: 0,
       },
+      completedDialogs: [],
+      unlockedAchievements: [],
+      tutorialCompleted: false,
     };
   }
 
@@ -281,6 +289,99 @@ export class SaveManager {
     } catch (e) {
       return false;
     }
+  }
+
+  // ============ 新增方法 ============
+
+  /**
+   * 标记对话已完成
+   */
+  completeDialog(dialogId: string): void {
+    if (!this.data.completedDialogs) {
+      this.data.completedDialogs = [];
+    }
+    if (!this.data.completedDialogs.includes(dialogId)) {
+      this.data.completedDialogs.push(dialogId);
+      this.save();
+    }
+  }
+
+  /**
+   * 获取已完成的对话
+   */
+  getCompletedDialogs(): string[] {
+    return this.data.completedDialogs || [];
+  }
+
+  /**
+   * 解锁成就
+   */
+  unlockAchievement(achievementId: string): boolean {
+    if (!this.data.unlockedAchievements) {
+      this.data.unlockedAchievements = [];
+    }
+    if (!this.data.unlockedAchievements.includes(achievementId)) {
+      this.data.unlockedAchievements.push(achievementId);
+      this.save();
+      return true; // 新解锁
+    }
+    return false; // 已解锁
+  }
+
+  /**
+   * 获取已解锁成就
+   */
+  getUnlockedAchievements(): string[] {
+    return this.data.unlockedAchievements || [];
+  }
+
+  /**
+   * 更新最大连击
+   */
+  updateMaxCombo(combo: number): void {
+    if (!this.data.statistics.maxCombo) {
+      this.data.statistics.maxCombo = 0;
+    }
+    if (combo > this.data.statistics.maxCombo) {
+      this.data.statistics.maxCombo = combo;
+      this.save();
+    }
+  }
+
+  /**
+   * 获取统计数据
+   */
+  getStatistics() {
+    return this.data.statistics;
+  }
+
+  /**
+   * 获取总星数
+   */
+  getTotalStars(): number {
+    return Object.values(this.data.levelStars).reduce((sum, stars) => sum + stars, 0);
+  }
+
+  /**
+   * 获取建造的建筑数量
+   */
+  getBuiltCount(): number {
+    return Object.values(this.data.buildings).filter(b => b.built).length;
+  }
+
+  /**
+   * 是否完成新手引导
+   */
+  isTutorialCompleted(): boolean {
+    return this.data.tutorialCompleted || false;
+  }
+
+  /**
+   * 标记新手引导完成
+   */
+  completeTutorial(): void {
+    this.data.tutorialCompleted = true;
+    this.save();
   }
 }
 
