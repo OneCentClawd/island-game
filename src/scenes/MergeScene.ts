@@ -130,12 +130,12 @@ export class MergeScene extends Phaser.Scene {
   private energyText!: Phaser.GameObjects.Text;
   private infoText!: Phaser.GameObjects.Text;
   
-  // 网格配置
-  private readonly GRID_COLS = 6;
-  private readonly GRID_ROWS = 5;
-  private readonly CELL_SIZE = 80;
-  private readonly GRID_OFFSET_X = 60;
-  private readonly GRID_OFFSET_Y = 150;
+  // 网格配置 - 更大更居中
+  private readonly GRID_COLS = 5;
+  private readonly GRID_ROWS = 6;
+  private readonly CELL_SIZE = 110;
+  private readonly GRID_OFFSET_X = (720 - 5 * 110) / 2;  // 居中
+  private readonly GRID_OFFSET_Y = 180;
 
   constructor() {
     super({ key: 'MergeScene' });
@@ -354,43 +354,49 @@ export class MergeScene extends Phaser.Scene {
     // 创建容器
     const container = this.add.container(pos.x, pos.y);
     
+    // 卡片尺寸
+    const cardSize = 90;
+    const halfCard = cardSize / 2;
+    
     // 卡片背景 (带阴影效果)
     const shadow = this.add.graphics();
     shadow.fillStyle(0x000000, 0.3);
-    shadow.fillRoundedRect(-30, -28, 60, 60, 12);
+    shadow.fillRoundedRect(-halfCard + 4, -halfCard + 4, cardSize, cardSize, 16);
     container.add(shadow);
     
     // 卡片主体
     const cardBg = this.add.graphics();
     cardBg.fillStyle(this.getTierColor(config.tier), 0.9);
-    cardBg.fillRoundedRect(-32, -30, 60, 60, 12);
-    cardBg.lineStyle(2, 0xffffff, 0.5);
-    cardBg.strokeRoundedRect(-32, -30, 60, 60, 12);
+    cardBg.fillRoundedRect(-halfCard, -halfCard, cardSize, cardSize, 16);
+    cardBg.lineStyle(3, 0xffffff, 0.5);
+    cardBg.strokeRoundedRect(-halfCard, -halfCard, cardSize, cardSize, 16);
     container.add(cardBg);
     
     // 内部高光
     const highlight = this.add.graphics();
     highlight.fillStyle(0xffffff, 0.2);
-    highlight.fillRoundedRect(-28, -26, 52, 25, 8);
+    highlight.fillRoundedRect(-halfCard + 6, -halfCard + 6, cardSize - 12, cardSize / 2 - 6, 10);
     container.add(highlight);
     
     // Emoji
     const emoji = this.add.text(0, 0, config.emoji, {
-      fontSize: '36px',
+      fontSize: '48px',
     }).setOrigin(0.5);
     container.add(emoji);
     
     // 等级徽章（如果不是仓库）
     if (config.tier > 0) {
+      const badgeX = halfCard - 8;
+      const badgeY = -halfCard + 8;
       const badgeBg = this.add.graphics();
       badgeBg.fillStyle(0x000000, 0.7);
-      badgeBg.fillCircle(22, -22, 12);
+      badgeBg.fillCircle(badgeX, badgeY, 14);
       badgeBg.fillStyle(this.getTierBadgeColor(config.tier), 1);
-      badgeBg.fillCircle(22, -22, 10);
+      badgeBg.fillCircle(badgeX, badgeY, 12);
       container.add(badgeBg);
       
-      const tierBadge = this.add.text(22, -22, `${config.tier}`, {
-        fontSize: '14px',
+      const tierBadge = this.add.text(badgeX, badgeY, `${config.tier}`, {
+        fontSize: '16px',
         color: '#ffffff',
         fontStyle: 'bold',
       }).setOrigin(0.5);
@@ -408,7 +414,7 @@ export class MergeScene extends Phaser.Scene {
     this.items.push(item);
     
     // 点击事件
-    container.setSize(64, 64);
+    container.setSize(90, 90);
     container.setInteractive({ useHandCursor: true });
     container.on('pointerdown', () => this.onItemClick(item));
     
