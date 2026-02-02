@@ -142,8 +142,8 @@ export class MergeScene extends Phaser.Scene {
   }
 
   create(): void {
-    // 背景
-    this.cameras.main.setBackgroundColor('#2d5a27');
+    // 创建漂亮的背景
+    this.createBackground();
     
     // 创建UI
     this.createUI();
@@ -164,58 +164,121 @@ export class MergeScene extends Phaser.Scene {
   }
 
   /**
+   * 创建背景
+   */
+  private createBackground(): void {
+    // 渐变背景
+    const bg = this.add.graphics();
+    
+    // 天空渐变 (上半部分)
+    for (let y = 0; y < GameConfig.HEIGHT / 2; y++) {
+      const ratio = y / (GameConfig.HEIGHT / 2);
+      const r = Math.floor(135 + (100 - 135) * ratio);
+      const g = Math.floor(206 + (180 - 206) * ratio);
+      const b = Math.floor(235 + (220 - 235) * ratio);
+      bg.fillStyle(Phaser.Display.Color.GetColor(r, g, b));
+      bg.fillRect(0, y, GameConfig.WIDTH, 1);
+    }
+    
+    // 草地渐变 (下半部分)
+    for (let y = GameConfig.HEIGHT / 2; y < GameConfig.HEIGHT; y++) {
+      const ratio = (y - GameConfig.HEIGHT / 2) / (GameConfig.HEIGHT / 2);
+      const r = Math.floor(76 + (45 - 76) * ratio);
+      const g = Math.floor(140 + (90 - 140) * ratio);
+      const b = Math.floor(80 + (50 - 80) * ratio);
+      bg.fillStyle(Phaser.Display.Color.GetColor(r, g, b));
+      bg.fillRect(0, y, GameConfig.WIDTH, 1);
+    }
+    
+    // 装饰云朵
+    this.add.text(100, 80, '☁️', { fontSize: '40px' }).setAlpha(0.6);
+    this.add.text(500, 60, '☁️', { fontSize: '30px' }).setAlpha(0.5);
+    this.add.text(620, 100, '☁️', { fontSize: '35px' }).setAlpha(0.4);
+    
+    // 装饰小树
+    this.add.text(30, GameConfig.HEIGHT - 80, '🌳', { fontSize: '50px' }).setAlpha(0.7);
+    this.add.text(650, GameConfig.HEIGHT - 90, '🌴', { fontSize: '55px' }).setAlpha(0.7);
+  }
+
+  /**
    * 创建UI
    */
   private createUI(): void {
+    // 顶部面板背景
+    const topPanel = this.add.graphics();
+    topPanel.fillStyle(0x000000, 0.4);
+    topPanel.fillRoundedRect(10, 10, GameConfig.WIDTH - 20, 110, 15);
+    
     // 标题
-    this.add.text(GameConfig.WIDTH / 2, 30, '🏝️ 小岛物语 - 合成', {
-      fontSize: '32px',
+    this.add.text(GameConfig.WIDTH / 2, 35, '🏝️ 小岛物语', {
+      fontSize: '28px',
       color: '#ffffff',
       fontStyle: 'bold',
+      shadow: { offsetX: 2, offsetY: 2, color: '#000', blur: 4, fill: true }
     }).setOrigin(0.5);
     
     // 资源显示（和其他模式共用）
     const resources = saveManager.getResources();
     const energy = saveManager.getEnergy();
     
+    // 资源条背景
+    const resBarY = 85;
+    const resPanel = this.add.graphics();
+    resPanel.fillStyle(0x000000, 0.3);
+    resPanel.fillRoundedRect(30, resBarY - 18, GameConfig.WIDTH - 60, 36, 10);
+    
     // 体力
-    this.energyText = this.add.text(GameConfig.WIDTH / 2 - 150, 75, `⚡ ${energy}`, {
-      fontSize: '22px',
-      color: '#ffffff',
+    this.energyText = this.add.text(100, resBarY, `⚡ ${energy}`, {
+      fontSize: '20px',
+      color: '#ffff00',
+      fontStyle: 'bold',
     }).setOrigin(0.5);
     
     // 金币
-    this.goldText = this.add.text(GameConfig.WIDTH / 2, 75, `💰 ${resources.coin}`, {
-      fontSize: '22px',
+    this.goldText = this.add.text(250, resBarY, `💰 ${resources.coin}`, {
+      fontSize: '20px',
       color: '#ffd700',
+      fontStyle: 'bold',
     }).setOrigin(0.5);
     
     // 木材
-    this.add.text(GameConfig.WIDTH / 2 + 100, 75, `🪵 ${resources.wood}`, {
-      fontSize: '22px',
-      color: '#8B4513',
+    this.add.text(420, resBarY, `🪵 ${resources.wood}`, {
+      fontSize: '20px',
+      color: '#deb887',
+      fontStyle: 'bold',
     }).setOrigin(0.5);
     
     // 石材
-    this.add.text(GameConfig.WIDTH / 2 + 200, 75, `🪨 ${resources.stone}`, {
-      fontSize: '22px',
-      color: '#808080',
-    }).setOrigin(0.5);
-    
-    // 信息提示
-    this.infoText = this.add.text(GameConfig.WIDTH / 2, GameConfig.HEIGHT - 50, '', {
+    this.add.text(570, resBarY, `🪨 ${resources.stone}`, {
       fontSize: '20px',
-      color: '#ffffff',
-      backgroundColor: '#00000080',
-      padding: { x: 20, y: 10 },
+      color: '#c0c0c0',
+      fontStyle: 'bold',
     }).setOrigin(0.5);
     
-    // 返回按钮
-    const backBtn = this.add.text(50, 30, '← 返回', {
-      fontSize: '24px',
-      color: '#ffffff',
-    }).setOrigin(0, 0.5).setInteractive({ useHandCursor: true });
+    // 底部信息栏
+    const infoPanel = this.add.graphics();
+    infoPanel.fillStyle(0x000000, 0.5);
+    infoPanel.fillRoundedRect(20, GameConfig.HEIGHT - 80, GameConfig.WIDTH - 40, 50, 12);
     
+    this.infoText = this.add.text(GameConfig.WIDTH / 2, GameConfig.HEIGHT - 55, '', {
+      fontSize: '18px',
+      color: '#ffffff',
+      fontStyle: 'bold',
+    }).setOrigin(0.5);
+    
+    // 返回按钮 (更好看)
+    const backBtnBg = this.add.graphics();
+    backBtnBg.fillStyle(0x000000, 0.5);
+    backBtnBg.fillRoundedRect(15, GameConfig.HEIGHT - 140, 90, 40, 10);
+    
+    const backBtn = this.add.text(60, GameConfig.HEIGHT - 120, '← 返回', {
+      fontSize: '18px',
+      color: '#ffffff',
+      fontStyle: 'bold',
+    }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+    
+    backBtn.on('pointerover', () => backBtn.setColor('#ffff00'));
+    backBtn.on('pointerout', () => backBtn.setColor('#ffffff'));
     backBtn.on('pointerdown', () => {
       this.scene.start('MainMenuScene');
     });
@@ -226,13 +289,33 @@ export class MergeScene extends Phaser.Scene {
    */
   private createGrid(): void {
     const graphics = this.add.graphics();
-    graphics.lineStyle(2, 0xffffff, 0.3);
     
+    // 网格整体背景
+    const gridWidth = this.GRID_COLS * this.CELL_SIZE;
+    const gridHeight = this.GRID_ROWS * this.CELL_SIZE;
+    graphics.fillStyle(0x000000, 0.25);
+    graphics.fillRoundedRect(
+      this.GRID_OFFSET_X - 10, 
+      this.GRID_OFFSET_Y - 10, 
+      gridWidth + 20, 
+      gridHeight + 20, 
+      15
+    );
+    
+    // 绘制单元格
     for (let row = 0; row < this.GRID_ROWS; row++) {
       for (let col = 0; col < this.GRID_COLS; col++) {
         const x = this.GRID_OFFSET_X + col * this.CELL_SIZE;
         const y = this.GRID_OFFSET_Y + row * this.CELL_SIZE;
-        graphics.strokeRect(x, y, this.CELL_SIZE, this.CELL_SIZE);
+        
+        // 单元格背景 (棋盘格效果)
+        const isLight = (row + col) % 2 === 0;
+        graphics.fillStyle(isLight ? 0xffffff : 0xe0e0e0, 0.15);
+        graphics.fillRoundedRect(x + 2, y + 2, this.CELL_SIZE - 4, this.CELL_SIZE - 4, 8);
+        
+        // 单元格边框
+        graphics.lineStyle(1, 0xffffff, 0.3);
+        graphics.strokeRoundedRect(x + 2, y + 2, this.CELL_SIZE - 4, this.CELL_SIZE - 4, 8);
       }
     }
   }
@@ -271,23 +354,45 @@ export class MergeScene extends Phaser.Scene {
     // 创建容器
     const container = this.add.container(pos.x, pos.y);
     
-    // 背景圆
-    const bg = this.add.circle(0, 0, 32, this.getTierColor(config.tier), 0.8);
-    container.add(bg);
+    // 卡片背景 (带阴影效果)
+    const shadow = this.add.graphics();
+    shadow.fillStyle(0x000000, 0.3);
+    shadow.fillRoundedRect(-30, -28, 60, 60, 12);
+    container.add(shadow);
+    
+    // 卡片主体
+    const cardBg = this.add.graphics();
+    cardBg.fillStyle(this.getTierColor(config.tier), 0.9);
+    cardBg.fillRoundedRect(-32, -30, 60, 60, 12);
+    cardBg.lineStyle(2, 0xffffff, 0.5);
+    cardBg.strokeRoundedRect(-32, -30, 60, 60, 12);
+    container.add(cardBg);
+    
+    // 内部高光
+    const highlight = this.add.graphics();
+    highlight.fillStyle(0xffffff, 0.2);
+    highlight.fillRoundedRect(-28, -26, 52, 25, 8);
+    container.add(highlight);
     
     // Emoji
     const emoji = this.add.text(0, 0, config.emoji, {
-      fontSize: '40px',
+      fontSize: '36px',
     }).setOrigin(0.5);
     container.add(emoji);
     
-    // 等级指示（如果不是仓库）
+    // 等级徽章（如果不是仓库）
     if (config.tier > 0) {
-      const tierBadge = this.add.text(20, -20, `${config.tier}`, {
-        fontSize: '16px',
+      const badgeBg = this.add.graphics();
+      badgeBg.fillStyle(0x000000, 0.7);
+      badgeBg.fillCircle(22, -22, 12);
+      badgeBg.fillStyle(this.getTierBadgeColor(config.tier), 1);
+      badgeBg.fillCircle(22, -22, 10);
+      container.add(badgeBg);
+      
+      const tierBadge = this.add.text(22, -22, `${config.tier}`, {
+        fontSize: '14px',
         color: '#ffffff',
-        backgroundColor: '#000000',
-        padding: { x: 4, y: 2 },
+        fontStyle: 'bold',
       }).setOrigin(0.5);
       container.add(tierBadge);
     }
@@ -609,16 +714,37 @@ export class MergeScene extends Phaser.Scene {
   }
 
   /**
-   * 获取等级对应颜色
+   * 获取等级对应颜色（卡片背景）
    */
   private getTierColor(tier: number): number {
     const colors = [
-      0x808080, // 0 - 灰色（仓库）
-      0x8B4513, // 1 - 棕色
-      0x228B22, // 2 - 绿色
-      0x4169E1, // 3 - 蓝色
-      0x9932CC, // 4 - 紫色
-      0xFFD700, // 5 - 金色
+      0x607d8b, // 0 - 蓝灰色（仓库）
+      0x8d6e63, // 1 - 棕色
+      0x66bb6a, // 2 - 绿色
+      0x42a5f5, // 3 - 蓝色
+      0xab47bc, // 4 - 紫色
+      0xffa726, // 5 - 橙色
+      0xef5350, // 6 - 红色
+      0xec407a, // 7 - 粉色
+      0xffee58, // 8 - 金色
+    ];
+    return colors[tier] || 0xffffff;
+  }
+
+  /**
+   * 获取等级徽章颜色
+   */
+  private getTierBadgeColor(tier: number): number {
+    const colors = [
+      0x607d8b, // 0
+      0x795548, // 1 - 棕
+      0x4caf50, // 2 - 绿
+      0x2196f3, // 3 - 蓝
+      0x9c27b0, // 4 - 紫
+      0xff9800, // 5 - 橙
+      0xf44336, // 6 - 红
+      0xe91e63, // 7 - 粉
+      0xffc107, // 8 - 金
     ];
     return colors[tier] || 0xffffff;
   }
