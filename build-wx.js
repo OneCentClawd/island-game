@@ -65,7 +65,42 @@ if (fs.existsSync(distDir)) {
 
 // 创建入口文件
 console.log('📝 创建入口文件...');
-fs.writeFileSync('dist-wx/game.js', `// 微信小游戏入口
+fs.writeFileSync('dist-wx/game.js', `// 微信小游戏入口 - 先设置全局环境
+(function() {
+  // GameGlobal 是微信小游戏的全局对象
+  var global = GameGlobal;
+  
+  // 设置 window
+  if (!global.window) {
+    global.window = global;
+  }
+  var window = global.window;
+  
+  // 设置 self
+  if (!global.self) {
+    global.self = global;
+  }
+  
+  // Phaser 需要的触摸检测
+  window.ontouchstart = function() {};
+  window.ontouchmove = function() {};
+  window.ontouchend = function() {};
+  
+  // 基础 document
+  if (!window.document) {
+    window.document = {
+      readyState: 'complete',
+      visibilityState: 'visible',
+      hidden: false,
+      head: { appendChild: function(){} },
+      body: { appendChild: function(){} },
+      createElement: function() { return {}; },
+      getElementById: function() { return null; },
+      addEventListener: function() {}
+    };
+  }
+})();
+
 require('./libs/weapp-adapter.js');
 require('./libs/phaser.min.js');
 require('./js/bundle.js');
