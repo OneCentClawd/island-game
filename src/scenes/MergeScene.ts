@@ -198,41 +198,35 @@ export class MergeScene extends Phaser.Scene {
       bg.fillRect(0, y, GameConfig.WIDTH, 1);
     }
     
-    // ===== 装饰元素 (避开 顶部0-120, 底部1180-1280, 网格区域) =====
+    // ===== 草地区域装饰 (y > 640, 避开网格和底部提示框) =====
+    // 网格大约在 x:100-620, 底部提示框在 y:1180+
+    // 草地从 y=640 开始
     
-    // 左上区域 (x: 0-100, y: 130-250)
-    this.add.text(15, 140, '🌳', { fontSize: '55px' }).setAlpha(0.8);
-    this.add.text(60, 180, '🐦', { fontSize: '22px' }).setAlpha(0.7);
-    this.add.text(25, 210, '🌸', { fontSize: '24px' }).setAlpha(0.6);
+    // 左侧草地 (x: 0-90)
+    this.add.text(15, 660, '🌳', { fontSize: '50px' }).setAlpha(0.8);
+    this.add.text(30, 750, '🌷', { fontSize: '24px' }).setAlpha(0.7);
+    this.add.text(10, 820, '🌻', { fontSize: '28px' }).setAlpha(0.7);
+    this.add.text(40, 900, '🐿️', { fontSize: '24px' }).setAlpha(0.7);
+    this.add.text(5, 970, '🌲', { fontSize: '55px' }).setAlpha(0.8);
+    this.add.text(35, 1050, '🍄', { fontSize: '26px' }).setAlpha(0.7);
+    this.add.text(15, 1110, '🌸', { fontSize: '24px' }).setAlpha(0.6);
     
-    // 右上区域 (x: 620-720, y: 130-250)
-    this.add.text(650, 135, '🌴', { fontSize: '55px' }).setAlpha(0.8);
-    this.add.text(620, 185, '🦋', { fontSize: '24px' }).setAlpha(0.7);
-    this.add.text(670, 215, '🌺', { fontSize: '22px' }).setAlpha(0.6);
+    // 右侧草地 (x: 630-720)
+    this.add.text(650, 680, '🌴', { fontSize: '52px' }).setAlpha(0.8);
+    this.add.text(670, 770, '🦋', { fontSize: '26px' }).setAlpha(0.7);
+    this.add.text(640, 840, '🌺', { fontSize: '26px' }).setAlpha(0.7);
+    this.add.text(665, 920, '🐰', { fontSize: '26px' }).setAlpha(0.7);
+    this.add.text(635, 990, '🌳', { fontSize: '48px' }).setAlpha(0.8);
+    this.add.text(680, 1060, '🌼', { fontSize: '24px' }).setAlpha(0.7);
+    this.add.text(650, 1120, '🍀', { fontSize: '22px' }).setAlpha(0.6);
     
-    // 左下区域 (x: 0-100, y: 930-1100)
-    this.add.text(10, 940, '🌲', { fontSize: '60px' }).setAlpha(0.8);
-    this.add.text(55, 980, '🍄', { fontSize: '26px' }).setAlpha(0.7);
-    this.add.text(20, 1020, '🌷', { fontSize: '24px' }).setAlpha(0.6);
-    this.add.text(50, 1055, '🐿️', { fontSize: '22px' }).setAlpha(0.7);
-    this.add.text(15, 1085, '🌻', { fontSize: '26px' }).setAlpha(0.6);
-    
-    // 右下区域 (x: 620-720, y: 930-1100)
-    this.add.text(645, 935, '🌳', { fontSize: '58px' }).setAlpha(0.8);
-    this.add.text(620, 985, '🌼', { fontSize: '24px' }).setAlpha(0.7);
-    this.add.text(665, 1015, '🐰', { fontSize: '24px' }).setAlpha(0.7);
-    this.add.text(625, 1050, '🍀', { fontSize: '22px' }).setAlpha(0.6);
-    this.add.text(660, 1080, '🌿', { fontSize: '26px' }).setAlpha(0.6);
-    
-    // 左侧中间 (x: 0-50, y: 400-700) - 网格左边
-    this.add.text(8, 450, '🦜', { fontSize: '26px' }).setAlpha(0.6);
-    this.add.text(15, 550, '🌾', { fontSize: '28px' }).setAlpha(0.5);
-    this.add.text(5, 650, '🌵', { fontSize: '30px' }).setAlpha(0.5);
-    
-    // 右侧中间 (x: 670-720, y: 400-700) - 网格右边
-    this.add.text(680, 420, '🐝', { fontSize: '22px' }).setAlpha(0.6);
-    this.add.text(670, 520, '🌱', { fontSize: '26px' }).setAlpha(0.5);
-    this.add.text(678, 620, '🎋', { fontSize: '28px' }).setAlpha(0.5);
+    // 底部中间草地 (网格下方, y: 870-1150, x: 100-620)
+    // 注意避开网格区域
+    this.add.text(150, 890, '🌱', { fontSize: '22px' }).setAlpha(0.5);
+    this.add.text(550, 900, '🌿', { fontSize: '24px' }).setAlpha(0.5);
+    this.add.text(250, 1100, '🐝', { fontSize: '20px' }).setAlpha(0.5);
+    this.add.text(450, 1110, '🦜', { fontSize: '22px' }).setAlpha(0.5);
+    this.add.text(350, 1130, '🌾', { fontSize: '24px' }).setAlpha(0.4);
   }
 
   /**
