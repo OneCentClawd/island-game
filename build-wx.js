@@ -50,42 +50,81 @@ var document = typeof document !== 'undefined' ? document : {};
 
 if (typeof wx !== 'undefined') {
   var _canvas = wx.createCanvas();
+  var _sysInfo = wx.getSystemInfoSync();
   
   window.canvas = _canvas;
-  window.innerWidth = _canvas.width;
-  window.innerHeight = _canvas.height;
-  window.devicePixelRatio = 1;
+  window.innerWidth = _sysInfo.windowWidth;
+  window.innerHeight = _sysInfo.windowHeight;
+  window.devicePixelRatio = _sysInfo.pixelRatio || 1;
+  window.screen = {
+    width: _sysInfo.windowWidth,
+    height: _sysInfo.windowHeight
+  };
 
   document.createElement = function(tagName) {
-    if (tagName === 'canvas') return wx.createCanvas();
-    if (tagName === 'img' || tagName === 'image') return wx.createImage();
-    return { style: {} };
+    tagName = tagName.toLowerCase();
+    if (tagName === 'canvas') {
+      var c = wx.createCanvas();
+      c.style = {};
+      return c;
+    }
+    if (tagName === 'img' || tagName === 'image') {
+      return wx.createImage();
+    }
+    if (tagName === 'audio') {
+      return wx.createInnerAudioContext();
+    }
+    return { style: {}, appendChild: function(){}, removeChild: function(){} };
   };
+  
   document.getElementById = function() { return _canvas; };
-  document.body = { appendChild: function() {} };
+  document.getElementsByTagName = function() { return []; };
+  document.querySelector = function() { return _canvas; };
+  document.querySelectorAll = function() { return []; };
+  document.body = { appendChild: function(){}, removeChild: function(){}, style: {} };
   document.documentElement = { style: {} };
+  document.head = { appendChild: function(){} };
+  document.readyState = 'complete';
 
+  window.document = document;
   window.Image = function() { return wx.createImage(); };
+  window.HTMLCanvasElement = function() {};
+  window.HTMLImageElement = function() {};
   
   window.addEventListener = function(type, listener) {
-    var eventMap = { touchstart: 'onTouchStart', touchmove: 'onTouchMove', touchend: 'onTouchEnd' };
-    if (eventMap[type]) wx[eventMap[type]](listener);
+    if (type === 'touchstart') wx.onTouchStart(listener);
+    else if (type === 'touchmove') wx.onTouchMove(listener);
+    else if (type === 'touchend') wx.onTouchEnd(listener);
+    else if (type === 'touchcancel') wx.onTouchCancel(listener);
   };
+  window.removeEventListener = function() {};
 
   window.Audio = function() { return wx.createInnerAudioContext(); };
 
   window.localStorage = {
-    getItem: function(key) { return wx.getStorageSync(key) || null; },
-    setItem: function(key, value) { wx.setStorageSync(key, value); },
-    removeItem: function(key) { wx.removeStorageSync(key); },
-    clear: function() { wx.clearStorageSync(); }
+    getItem: function(key) { try { return wx.getStorageSync(key) || null; } catch(e) { return null; } },
+    setItem: function(key, value) { try { wx.setStorageSync(key, value); } catch(e) {} },
+    removeItem: function(key) { try { wx.removeStorageSync(key); } catch(e) {} },
+    clear: function() { try { wx.clearStorageSync(); } catch(e) {} }
   };
 
-  window.requestAnimationFrame = _canvas.requestAnimationFrame.bind(_canvas);
-  window.cancelAnimationFrame = _canvas.cancelAnimationFrame.bind(_canvas);
+  // RAF - 使用全局的 requestAnimationFrame
+  window.requestAnimationFrame = typeof requestAnimationFrame !== 'undefined' 
+    ? requestAnimationFrame 
+    : function(cb) { return setTimeout(cb, 16); };
+  window.cancelAnimationFrame = typeof cancelAnimationFrame !== 'undefined'
+    ? cancelAnimationFrame
+    : function(id) { clearTimeout(id); };
+    
   window.focus = function() {};
   window.scrollTo = function() {};
-  navigator.userAgent = 'wxgame';
+  window.getComputedStyle = function() { return { getPropertyValue: function() { return ''; } }; };
+  window.navigator = { userAgent: 'wxgame', language: 'zh-CN' };
+  
+  // Performance
+  window.performance = {
+    now: function() { return Date.now(); }
+  };
 }
 `;
 fs.writeFileSync('dist-wx/libs/weapp-adapter.js', adapterCode);
