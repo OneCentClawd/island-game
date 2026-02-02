@@ -296,7 +296,16 @@ if (fs.existsSync(distDir)) {
 
 // 创建入口文件
 console.log('📝 创建入口文件...');
-fs.writeFileSync('dist-wx/game.js', `require('./libs/weapp-adapter.js');
+fs.writeFileSync('dist-wx/game.js', `// 确保 window 存在
+if (typeof window === 'undefined') {
+  var window = {};
+}
+window.ontouchstart = true;
+window.ontouchmove = true;
+window.ontouchend = true;
+window.document = window.document || {};
+
+require('./libs/weapp-adapter.js');
 require('./libs/phaser.min.js');
 require('./js/bundle.js');
 `);
