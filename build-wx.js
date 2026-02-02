@@ -32,11 +32,24 @@ fs.copyFileSync('wx-template/game.json', 'dist-wx/game.json');
 fs.copyFileSync('wx-template/project.config.json', 'dist-wx/project.config.json');
 fs.copyFileSync('wx-template/project.private.config.json', 'dist-wx/project.private.config.json');
 
-// 复制 Phaser 库
+// 复制 Phaser 库（并添加微信适配头）
 console.log('📚 复制 Phaser 库...');
 const phaserPath = 'node_modules/phaser/dist/phaser.min.js';
 if (fs.existsSync(phaserPath)) {
-  fs.copyFileSync(phaserPath, 'dist-wx/libs/phaser.min.js');
+  const phaserCode = fs.readFileSync(phaserPath, 'utf-8');
+  // 在 Phaser 代码开头添加 window 定义
+  const patchedPhaser = `// 微信小游戏环境适配
+if (typeof window === 'undefined') {
+  var window = GameGlobal;
+  window.window = window;
+}
+if (typeof self === 'undefined') {
+  var self = window;
+}
+window.ontouchstart = window.ontouchstart || function(){};
+window.document = window.document || {};
+` + phaserCode;
+  fs.writeFileSync('dist-wx/libs/phaser.min.js', patchedPhaser);
 } else {
   console.error('找不到 Phaser 库！请先运行 npm install');
   process.exit(1);
