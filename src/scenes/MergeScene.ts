@@ -150,13 +150,14 @@ export class MergeScene extends Phaser.Scene {
     // 创建网格
     this.createGrid();
     
-    // 初始仓库
-    this.spawnWarehouse(2, 2);
-    
-    // 初始物品
-    this.spawnItem('wood1', 0, 0);
-    this.spawnItem('wood1', 1, 0);
-    this.spawnItem('stone1', 0, 1);
+    // 尝试加载存档
+    if (!this.loadGame()) {
+      // 没有存档，初始化新游戏
+      this.spawnWarehouse(2, 2);
+      this.spawnItem('wood1', 0, 0);
+      this.spawnItem('wood1', 1, 0);
+      this.spawnItem('stone1', 0, 1);
+    }
     
     this.showInfo('点击仓库获取物品，点击两个相同物品合成！');
   }
@@ -448,6 +449,7 @@ export class MergeScene extends Phaser.Scene {
         }
         
         this.selectedItem = null;
+        this.saveGame();  // 保存
       },
     });
     
@@ -498,6 +500,7 @@ export class MergeScene extends Phaser.Scene {
       });
       
       this.showInfo(`📦 获得了 ${newItem.config.emoji} ${newItem.config.name}！`);
+      this.saveGame();  // 保存
     }
     
     // 仓库弹跳效果
@@ -527,6 +530,7 @@ export class MergeScene extends Phaser.Scene {
       ease: 'Quad.in',
       onComplete: () => {
         this.removeItem(item);
+        this.saveGame();  // 保存
       },
     });
     
@@ -613,5 +617,50 @@ export class MergeScene extends Phaser.Scene {
    */
   private showInfo(text: string): void {
     this.infoText.setText(text);
+  }
+
+  /**
+   * 保存游戏
+   */
+  private saveGame(): void {
+    const saveData = {
+      gold: this.gold,
+      nextId: this.nextId,
+      items: this.items.map(item => ({
+        key: item.config.key,
+        x: item.x,
+        y: item.y,
+      })),
+    };
+    localStorage.setItem('merge_save', JSON.stringify(saveData));
+  }
+
+  /**
+   * 加载游戏
+   */
+  private loadGame(): boolean {
+    const saved = localStorage.getItem('merge_save');
+    if (!saved) return false;
+    
+    try {
+      const data = JSON.parse(saved);
+      this.gold = data.gold || 0;
+      this.nextId = data.nextId || 1;
+      this.goldText.setText(`💰 ${this.gold}`);
+      
+      // 恢复物品
+      for (const itemData of data.items || []) {
+        if (itemData.key === 'warehouse') {
+          this.spawnWarehouse(itemData.x, itemData.y);
+        } else {
+          this.spawnItem(itemData.key, itemData.x, itemData.y);
+        }
+      }
+      
+      return true;
+    } catch (e) {
+      console.error('加载存档失败', e);
+      return false;
+    }
   }
 }
