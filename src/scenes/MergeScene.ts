@@ -198,9 +198,17 @@ export class MergeScene extends Phaser.Scene {
       bg.fillRect(0, y, GameConfig.WIDTH, 1);
     }
     
+    // ===== 天空区域装饰 (y: 130-250, 资源框下方) =====
+    this.add.text(50, 140, '☁️', { fontSize: '45px' }).setAlpha(0.6);
+    this.add.text(280, 160, '☁️', { fontSize: '35px' }).setAlpha(0.5);
+    this.add.text(550, 135, '☁️', { fontSize: '40px' }).setAlpha(0.55);
+    this.add.text(150, 200, '☁️', { fontSize: '30px' }).setAlpha(0.4);
+    this.add.text(450, 190, '☁️', { fontSize: '32px' }).setAlpha(0.45);
+    this.add.text(650, 180, '☀️', { fontSize: '50px' }).setAlpha(0.8);
+    this.add.text(380, 220, '🐦', { fontSize: '20px' }).setAlpha(0.5);
+    
     // ===== 草地区域装饰 (y > 640, 避开网格和底部提示框) =====
     // 网格大约在 x:100-620, 底部提示框在 y:1180+
-    // 草地从 y=640 开始
     
     // 左侧草地 (x: 0-90)
     this.add.text(15, 660, '🌳', { fontSize: '50px' }).setAlpha(0.8);
@@ -221,7 +229,6 @@ export class MergeScene extends Phaser.Scene {
     this.add.text(650, 1120, '🍀', { fontSize: '22px' }).setAlpha(0.6);
     
     // 底部中间草地 (网格下方, y: 870-1150, x: 100-620)
-    // 注意避开网格区域
     this.add.text(150, 890, '🌱', { fontSize: '22px' }).setAlpha(0.5);
     this.add.text(550, 900, '🌿', { fontSize: '24px' }).setAlpha(0.5);
     this.add.text(250, 1100, '🐝', { fontSize: '20px' }).setAlpha(0.5);
