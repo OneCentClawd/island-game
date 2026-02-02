@@ -198,14 +198,28 @@ export class MergeScene extends Phaser.Scene {
       bg.fillRect(0, y, GameConfig.WIDTH, 1);
     }
     
-    // 装饰云朵
-    this.add.text(100, 80, '☁️', { fontSize: '40px' }).setAlpha(0.6);
-    this.add.text(500, 60, '☁️', { fontSize: '30px' }).setAlpha(0.5);
-    this.add.text(620, 100, '☁️', { fontSize: '35px' }).setAlpha(0.4);
+    // 太阳
+    this.add.text(620, 45, '☀️', { fontSize: '45px' }).setAlpha(0.8);
     
-    // 装饰小树
-    this.add.text(30, GameConfig.HEIGHT - 80, '🌳', { fontSize: '50px' }).setAlpha(0.7);
-    this.add.text(650, GameConfig.HEIGHT - 90, '🌴', { fontSize: '55px' }).setAlpha(0.7);
+    // 底部装饰 - 左侧
+    this.add.text(15, GameConfig.HEIGHT - 160, '🌳', { fontSize: '60px' }).setAlpha(0.8);
+    this.add.text(5, GameConfig.HEIGHT - 100, '🌸', { fontSize: '30px' }).setAlpha(0.7);
+    this.add.text(50, GameConfig.HEIGHT - 85, '🌷', { fontSize: '25px' }).setAlpha(0.6);
+    this.add.text(20, GameConfig.HEIGHT - 55, '🌻', { fontSize: '28px' }).setAlpha(0.7);
+    
+    // 底部装饰 - 右侧
+    this.add.text(650, GameConfig.HEIGHT - 170, '🌴', { fontSize: '65px' }).setAlpha(0.8);
+    this.add.text(680, GameConfig.HEIGHT - 95, '🌺', { fontSize: '28px' }).setAlpha(0.7);
+    this.add.text(620, GameConfig.HEIGHT - 70, '🍀', { fontSize: '25px' }).setAlpha(0.6);
+    this.add.text(660, GameConfig.HEIGHT - 50, '🌼', { fontSize: '26px' }).setAlpha(0.7);
+    
+    // 小动物
+    this.add.text(45, GameConfig.HEIGHT - 130, '🐦', { fontSize: '22px' }).setAlpha(0.7);
+    this.add.text(665, GameConfig.HEIGHT - 130, '🦋', { fontSize: '24px' }).setAlpha(0.6);
+    
+    // 底部草丛装饰
+    this.add.text(90, GameConfig.HEIGHT - 45, '🌿', { fontSize: '30px' }).setAlpha(0.5);
+    this.add.text(580, GameConfig.HEIGHT - 40, '🌿', { fontSize: '28px' }).setAlpha(0.5);
   }
 
   /**
