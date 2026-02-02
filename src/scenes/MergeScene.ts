@@ -496,19 +496,19 @@ export class MergeScene extends Phaser.Scene {
    * 点击仓库
    */
   private onWarehouseClick(warehouse: PlacedItem): void {
-    // 检查体力
-    if (!saveManager.useEnergy(1)) {
-      this.showInfo('❌ 体力不足！');
-      return;
-    }
-    this.updateEnergyUI();
-    
-    // 找空位
+    // 先找空位
     const empty = this.findEmptyCell();
     if (!empty) {
       this.showInfo('❌ 没有空位了！先合成一些物品');
       return;
     }
+    
+    // 再检查体力
+    if (!saveManager.useEnergy(1)) {
+      this.showInfo('❌ 体力不足！');
+      return;
+    }
+    this.updateEnergyUI();
     
     // 随机选择物品
     const total = WAREHOUSE_DROPS.reduce((sum, d) => sum + d.weight, 0);
