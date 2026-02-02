@@ -46,22 +46,27 @@ export class MainMenuScene extends Phaser.Scene {
     }).setOrigin(0.5);
 
     // 开始游戏按钮（关卡选择）
-    this.createButton(centerX, 500, '🎮 开始游戏', () => {
+    this.createButton(centerX, 480, '🎮 消消乐', () => {
       this.scene.start('LevelSelectScene');
     });
 
+    // 合成模式
+    this.createButton(centerX, 550, '🔄 合成模式', () => {
+      this.scene.start('MergeScene');
+    });
+
     // 进入小岛按钮
-    this.createButton(centerX, 580, '🏝️ 我的小岛', () => {
+    this.createButton(centerX, 620, '🏝️ 我的小岛', () => {
       this.scene.start('IslandScene');
     });
 
     // 每日任务
-    this.createButton(centerX, 660, '📋 每日任务', () => {
+    this.createButton(centerX, 690, '📋 每日任务', () => {
       this.scene.start('DailyTaskScene');
     });
 
     // 商店
-    this.createButton(centerX, 740, '🛒 商店', () => {
+    this.createButton(centerX, 760, '🛒 商店', () => {
       this.scene.start('ShopScene');
     });
 
