@@ -45,87 +45,204 @@ if (fs.existsSync(phaserPath)) {
 // 创建微信适配器
 console.log('🔧 创建微信适配器...');
 const adapterCode = `// 微信小游戏适配器
-var window = typeof window !== 'undefined' ? window : {};
-var document = typeof document !== 'undefined' ? document : {};
+(function() {
+  var _wx = typeof wx !== 'undefined' ? wx : null;
+  if (!_wx) return;
 
-if (typeof wx !== 'undefined') {
-  var _canvas = wx.createCanvas();
-  var _sysInfo = wx.getSystemInfoSync();
+  var _canvas = _wx.createCanvas();
+  var _sysInfo = _wx.getSystemInfoSync();
+
+  // 全局 window
+  if (typeof window === 'undefined') {
+    window = {};
+  }
   
+  // 全局 document  
+  if (typeof document === 'undefined') {
+    document = {};
+  }
+
+  // Canvas 和屏幕信息
   window.canvas = _canvas;
   window.innerWidth = _sysInfo.windowWidth;
   window.innerHeight = _sysInfo.windowHeight;
   window.devicePixelRatio = _sysInfo.pixelRatio || 1;
   window.screen = {
     width: _sysInfo.windowWidth,
-    height: _sysInfo.windowHeight
+    height: _sysInfo.windowHeight,
+    availWidth: _sysInfo.windowWidth,
+    availHeight: _sysInfo.windowHeight
   };
 
+  // 触摸支持检测 - Phaser 需要这个
+  window.ontouchstart = {};
+  window.ontouchmove = {};
+  window.ontouchend = {};
+
+  // document 方法
   document.createElement = function(tagName) {
-    tagName = tagName.toLowerCase();
+    tagName = (tagName || '').toLowerCase();
     if (tagName === 'canvas') {
-      var c = wx.createCanvas();
-      c.style = {};
+      var c = _wx.createCanvas();
+      c.style = c.style || {};
+      c.addEventListener = function() {};
+      c.removeEventListener = function() {};
       return c;
     }
     if (tagName === 'img' || tagName === 'image') {
-      return wx.createImage();
+      var img = _wx.createImage();
+      img.addEventListener = function(type, cb) {
+        if (type === 'load') img.onload = cb;
+        if (type === 'error') img.onerror = cb;
+      };
+      return img;
     }
     if (tagName === 'audio') {
-      return wx.createInnerAudioContext();
+      return _wx.createInnerAudioContext();
     }
-    return { style: {}, appendChild: function(){}, removeChild: function(){} };
+    if (tagName === 'video') {
+      return { style: {}, play: function(){}, pause: function(){} };
+    }
+    return { 
+      style: {}, 
+      appendChild: function(){}, 
+      removeChild: function(){},
+      addEventListener: function(){},
+      removeEventListener: function(){},
+      classList: { add: function(){}, remove: function(){} }
+    };
   };
   
   document.getElementById = function() { return _canvas; };
-  document.getElementsByTagName = function() { return []; };
-  document.querySelector = function() { return _canvas; };
+  document.getElementsByTagName = function(tag) { 
+    if (tag === 'canvas') return [_canvas];
+    if (tag === 'head') return [document.head];
+    return []; 
+  };
+  document.getElementsByClassName = function() { return []; };
+  document.querySelector = function(sel) { 
+    if (sel === 'canvas' || sel === '#game-container') return _canvas;
+    return null; 
+  };
   document.querySelectorAll = function() { return []; };
-  document.body = { appendChild: function(){}, removeChild: function(){}, style: {} };
-  document.documentElement = { style: {} };
-  document.head = { appendChild: function(){} };
+  document.createElementNS = function(ns, tag) { return document.createElement(tag); };
+  
+  document.body = { 
+    appendChild: function(){}, 
+    removeChild: function(){}, 
+    insertBefore: function(){},
+    style: {},
+    clientWidth: _sysInfo.windowWidth,
+    clientHeight: _sysInfo.windowHeight
+  };
+  document.documentElement = { 
+    style: {},
+    clientWidth: _sysInfo.windowWidth,
+    clientHeight: _sysInfo.windowHeight
+  };
+  document.head = { appendChild: function(){}, removeChild: function(){} };
   document.readyState = 'complete';
 
+  // window 属性
   window.document = document;
-  window.Image = function() { return wx.createImage(); };
+  window.location = { href: '', protocol: 'https:', host: '' };
+  window.Image = function() { return document.createElement('img'); };
+  window.Audio = function() { return _wx.createInnerAudioContext(); };
+  window.HTMLElement = function() {};
   window.HTMLCanvasElement = function() {};
   window.HTMLImageElement = function() {};
+  window.HTMLVideoElement = function() {};
+  window.FileReader = function() {};
+  window.FontFace = function() {};
+  window.URL = { createObjectURL: function(){ return ''; }, revokeObjectURL: function(){} };
+  window.Blob = function() {};
+  window.WebSocket = function() {};
+  window.XMLHttpRequest = function() {
+    var req = {
+      open: function(){},
+      send: function(){},
+      setRequestHeader: function(){},
+      readyState: 0,
+      status: 0,
+      responseText: '',
+      onreadystatechange: null
+    };
+    return req;
+  };
   
-  window.addEventListener = function(type, listener) {
-    if (type === 'touchstart') wx.onTouchStart(listener);
-    else if (type === 'touchmove') wx.onTouchMove(listener);
-    else if (type === 'touchend') wx.onTouchEnd(listener);
-    else if (type === 'touchcancel') wx.onTouchCancel(listener);
+  // 事件
+  window.addEventListener = function(type, listener, options) {
+    if (type === 'touchstart') _wx.onTouchStart(function(e) { listener(wrapTouchEvent(e)); });
+    else if (type === 'touchmove') _wx.onTouchMove(function(e) { listener(wrapTouchEvent(e)); });
+    else if (type === 'touchend') _wx.onTouchEnd(function(e) { listener(wrapTouchEvent(e)); });
+    else if (type === 'touchcancel') _wx.onTouchCancel(function(e) { listener(wrapTouchEvent(e)); });
+    else if (type === 'load' || type === 'DOMContentLoaded') {
+      setTimeout(listener, 0);
+    }
   };
   window.removeEventListener = function() {};
+  
+  function wrapTouchEvent(e) {
+    return {
+      changedTouches: e.changedTouches,
+      touches: e.touches,
+      timeStamp: e.timeStamp,
+      preventDefault: function() {},
+      stopPropagation: function() {}
+    };
+  }
 
-  window.Audio = function() { return wx.createInnerAudioContext(); };
-
+  // localStorage
   window.localStorage = {
-    getItem: function(key) { try { return wx.getStorageSync(key) || null; } catch(e) { return null; } },
-    setItem: function(key, value) { try { wx.setStorageSync(key, value); } catch(e) {} },
-    removeItem: function(key) { try { wx.removeStorageSync(key); } catch(e) {} },
-    clear: function() { try { wx.clearStorageSync(); } catch(e) {} }
+    getItem: function(key) { try { return _wx.getStorageSync(key) || null; } catch(e) { return null; } },
+    setItem: function(key, value) { try { _wx.setStorageSync(key, String(value)); } catch(e) {} },
+    removeItem: function(key) { try { _wx.removeStorageSync(key); } catch(e) {} },
+    clear: function() { try { _wx.clearStorageSync(); } catch(e) {} },
+    key: function() { return null; },
+    length: 0
   };
 
-  // RAF - 使用全局的 requestAnimationFrame
-  window.requestAnimationFrame = typeof requestAnimationFrame !== 'undefined' 
-    ? requestAnimationFrame 
-    : function(cb) { return setTimeout(cb, 16); };
-  window.cancelAnimationFrame = typeof cancelAnimationFrame !== 'undefined'
-    ? cancelAnimationFrame
-    : function(id) { clearTimeout(id); };
-    
+  // requestAnimationFrame
+  window.requestAnimationFrame = requestAnimationFrame;
+  window.cancelAnimationFrame = cancelAnimationFrame;
+  
+  // 其他方法
   window.focus = function() {};
+  window.blur = function() {};
+  window.close = function() {};
   window.scrollTo = function() {};
-  window.getComputedStyle = function() { return { getPropertyValue: function() { return ''; } }; };
-  window.navigator = { userAgent: 'wxgame', language: 'zh-CN' };
+  window.scroll = function() {};
+  window.alert = function() {};
+  window.open = function() { return null; };
+  window.getComputedStyle = function(el) { 
+    return { 
+      getPropertyValue: function() { return ''; },
+      width: el && el.width ? el.width + 'px' : '0px',
+      height: el && el.height ? el.height + 'px' : '0px'
+    }; 
+  };
+  window.matchMedia = function() { return { matches: false, addListener: function(){} }; };
+  window.navigator = { 
+    userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) wxgame',
+    language: 'zh-CN',
+    platform: 'iPhone',
+    appVersion: '5.0',
+    maxTouchPoints: 10
+  };
   
   // Performance
-  window.performance = {
-    now: function() { return Date.now(); }
+  window.performance = window.performance || {
+    now: function() { return Date.now(); },
+    mark: function() {},
+    measure: function() {},
+    getEntriesByName: function() { return []; }
   };
-}
+
+  // console 保持原样
+  if (typeof console === 'undefined') {
+    console = { log: function(){}, warn: function(){}, error: function(){} };
+  }
+})();
 `;
 fs.writeFileSync('dist-wx/libs/weapp-adapter.js', adapterCode);
 
