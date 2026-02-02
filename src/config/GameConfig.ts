@@ -42,12 +42,12 @@ export const GameConfig = {
     stone: 50,
     coin: 500,
     diamond: 10,
-    energy: 30,
+    energy: 10000,
   },
 
   // 体力配置
   ENERGY: {
-    MAX: 30,
+    MAX: 10000,
     PER_LEVEL: 5,
     REGEN_MINUTES: 5,
   },
