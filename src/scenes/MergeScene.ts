@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { GameConfig } from '../config/GameConfig';
+import { saveManager } from '../managers/SaveManager';
 
 /**
  * 物品配置
@@ -122,11 +123,11 @@ interface PlacedItem {
 export class MergeScene extends Phaser.Scene {
   private items: PlacedItem[] = [];
   private selectedItem: PlacedItem | null = null;
-  private gold: number = 0;
   private nextId: number = 1;
   
   // UI
   private goldText!: Phaser.GameObjects.Text;
+  private energyText!: Phaser.GameObjects.Text;
   private infoText!: Phaser.GameObjects.Text;
   
   // 网格配置
@@ -167,16 +168,38 @@ export class MergeScene extends Phaser.Scene {
    */
   private createUI(): void {
     // 标题
-    this.add.text(GameConfig.WIDTH / 2, 30, '🏝️ 小岛物语', {
-      fontSize: '36px',
+    this.add.text(GameConfig.WIDTH / 2, 30, '🏝️ 小岛物语 - 合成', {
+      fontSize: '32px',
       color: '#ffffff',
       fontStyle: 'bold',
     }).setOrigin(0.5);
     
-    // 金币显示
-    this.goldText = this.add.text(GameConfig.WIDTH / 2, 80, '💰 0', {
-      fontSize: '28px',
+    // 资源显示（和其他模式共用）
+    const resources = saveManager.getResources();
+    const energy = saveManager.getEnergy();
+    
+    // 体力
+    this.energyText = this.add.text(GameConfig.WIDTH / 2 - 150, 75, `⚡ ${energy}`, {
+      fontSize: '22px',
+      color: '#ffffff',
+    }).setOrigin(0.5);
+    
+    // 金币
+    this.goldText = this.add.text(GameConfig.WIDTH / 2, 75, `💰 ${resources.coin}`, {
+      fontSize: '22px',
       color: '#ffd700',
+    }).setOrigin(0.5);
+    
+    // 木材
+    this.add.text(GameConfig.WIDTH / 2 + 100, 75, `🪵 ${resources.wood}`, {
+      fontSize: '22px',
+      color: '#8B4513',
+    }).setOrigin(0.5);
+    
+    // 石材
+    this.add.text(GameConfig.WIDTH / 2 + 200, 75, `🪨 ${resources.stone}`, {
+      fontSize: '22px',
+      color: '#808080',
     }).setOrigin(0.5);
     
     // 信息提示
@@ -517,24 +540,25 @@ export class MergeScene extends Phaser.Scene {
    */
   private collectCoin(item: PlacedItem): void {
     const value = item.config.value || 0;
-    this.gold += value;
-    this.goldText.setText(`💰 ${this.gold}`);
+    saveManager.updateResources({ coin: value });
+    const newCoin = saveManager.getResources().coin;
+    this.goldText.setText(`💰 ${newCoin}`);
     
     // 飞向金币UI的效果
     this.tweens.add({
       targets: item.container,
       x: GameConfig.WIDTH / 2,
-      y: 80,
+      y: 75,
       scale: 0,
       duration: 300,
       ease: 'Quad.in',
       onComplete: () => {
         this.removeItem(item);
-        this.saveGame();  // 保存
+        this.saveGame();  // 保存合成场景物品
       },
     });
     
-    this.showInfo(`💰 +${value} 金币！总计: ${this.gold}`);
+    this.showInfo(`💰 +${value} 金币！总计: ${newCoin}`);
   }
 
   /**
@@ -620,11 +644,10 @@ export class MergeScene extends Phaser.Scene {
   }
 
   /**
-   * 保存游戏
+   * 保存游戏（只保存合成场景的物品布局）
    */
   private saveGame(): void {
     const saveData = {
-      gold: this.gold,
       nextId: this.nextId,
       items: this.items.map(item => ({
         key: item.config.key,
@@ -644,9 +667,7 @@ export class MergeScene extends Phaser.Scene {
     
     try {
       const data = JSON.parse(saved);
-      this.gold = data.gold || 0;
       this.nextId = data.nextId || 1;
-      this.goldText.setText(`💰 ${this.gold}`);
       
       // 恢复物品
       for (const itemData of data.items || []) {
