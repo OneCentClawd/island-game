@@ -10,7 +10,7 @@ const { execSync } = require('child_process');
 console.log('🏝️ 构建小岛物语微信小游戏版本...\n');
 
 // 创建目录
-const dirs = ['dist-wx', 'dist-wx/js', 'dist-wx/libs', 'dist-wx/open-data-context'];
+const dirs = ['dist-wx', 'dist-wx/js', 'dist-wx/libs'];
 dirs.forEach(dir => {
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
@@ -267,41 +267,8 @@ require('./libs/phaser.min.js');
 require('./js/bundle.js');
 `);
 
-// 创建开放数据域
-console.log('🏆 创建排行榜...');
-fs.writeFileSync('dist-wx/open-data-context/index.js', `var sharedCanvas = wx.getSharedCanvas();
-var ctx = sharedCanvas.getContext('2d');
-
-wx.onMessage(function(data) {
-  if (data.type === 'showRank') {
-    wx.getFriendCloudStorage({
-      keyList: ['score'],
-      success: function(res) {
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(0, 0, sharedCanvas.width, sharedCanvas.height);
-        ctx.fillStyle = '#333333';
-        ctx.font = '20px Arial';
-        ctx.fillText('好友排行榜', 20, 40);
-        
-        res.data.sort(function(a, b) {
-          var sa = a.KVDataList.find(function(kv) { return kv.key === 'score'; });
-          var sb = b.KVDataList.find(function(kv) { return kv.key === 'score'; });
-          return (sb ? parseInt(sb.value) : 0) - (sa ? parseInt(sa.value) : 0);
-        });
-        
-        res.data.slice(0, 10).forEach(function(item, index) {
-          var score = item.KVDataList.find(function(kv) { return kv.key === 'score'; });
-          ctx.fillText((index + 1) + '. ' + item.nickname + ': ' + (score ? score.value : 0), 20, 80 + index * 30);
-        });
-      }
-    });
-  }
-});
-`);
-fs.writeFileSync('dist-wx/open-data-context/game.json', '{}');
-
 console.log('\n✅ 构建完成！\n');
 console.log('下一步：');
 console.log('1. 用微信开发者工具打开 dist-wx 目录');
-console.log('2. 在 project.config.json 中把 YOUR_APPID_HERE 改成您的 AppID');
+console.log('2. 选择测试号或填入小游戏 AppID');
 console.log('3. 预览或上传');
