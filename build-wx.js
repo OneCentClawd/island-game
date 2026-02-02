@@ -32,24 +32,41 @@ fs.copyFileSync('wx-template/game.json', 'dist-wx/game.json');
 fs.copyFileSync('wx-template/project.config.json', 'dist-wx/project.config.json');
 fs.copyFileSync('wx-template/project.private.config.json', 'dist-wx/project.private.config.json');
 
-// 复制 Phaser 库（并添加微信适配头）
-console.log('📚 复制 Phaser 库...');
+// 复制 Phaser 库（并修补微信小游戏兼容性）
+console.log('📚 复制并修补 Phaser 库...');
 const phaserPath = 'node_modules/phaser/dist/phaser.min.js';
 if (fs.existsSync(phaserPath)) {
-  const phaserCode = fs.readFileSync(phaserPath, 'utf-8');
-  // 在 Phaser 代码开头添加 window 定义
-  const patchedPhaser = `// 微信小游戏环境适配
-if (typeof window === 'undefined') {
-  var window = GameGlobal;
-  window.window = window;
-}
-if (typeof self === 'undefined') {
-  var self = window;
-}
-window.ontouchstart = window.ontouchstart || function(){};
-window.document = window.document || {};
-` + phaserCode;
-  fs.writeFileSync('dist-wx/libs/phaser.min.js', patchedPhaser);
+  let phaserCode = fs.readFileSync(phaserPath, 'utf-8');
+  
+  // 修补 'ontouchstart' in xxx 检测，改成 try-catch 安全版本
+  // 把 'ontouchstart' in document.documentElement 替换掉
+  phaserCode = phaserCode.replace(
+    /"ontouchstart"in \w+\.documentElement/g,
+    'true'
+  );
+  phaserCode = phaserCode.replace(
+    /'ontouchstart'in \w+\.documentElement/g,
+    'true'
+  );
+  // 把 'ontouchstart' in window 替换掉
+  phaserCode = phaserCode.replace(
+    /"ontouchstart"in window/g,
+    'true'
+  );
+  phaserCode = phaserCode.replace(
+    /'ontouchstart'in window/g,
+    'true'
+  );
+  phaserCode = phaserCode.replace(
+    /"ontouchstart"in \w+/g,
+    'true'
+  );
+  phaserCode = phaserCode.replace(
+    /'ontouchstart'in \w+/g,
+    'true'
+  );
+  
+  fs.writeFileSync('dist-wx/libs/phaser.min.js', phaserCode);
 } else {
   console.error('找不到 Phaser 库！请先运行 npm install');
   process.exit(1);
