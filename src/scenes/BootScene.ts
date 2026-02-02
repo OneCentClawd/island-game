@@ -9,6 +9,8 @@ export class BootScene extends Phaser.Scene {
   }
 
   create(): void {
+    console.log('BootScene create!');
+    
     // 设置游戏全局数据
     this.registry.set('resources', {
       wood: 100,
