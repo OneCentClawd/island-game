@@ -130,18 +130,26 @@ export class MergeScene extends Phaser.Scene {
   private energyText!: Phaser.GameObjects.Text;
   private infoText!: Phaser.GameObjects.Text;
   
-  // 网格配置 - 更大更居中
-  private readonly GRID_COLS = 5;
-  private readonly GRID_ROWS = 6;
-  private readonly CELL_SIZE = 110;
-  private readonly GRID_OFFSET_X = (720 - 5 * 110) / 2;  // 居中
-  private readonly GRID_OFFSET_Y = 180;
+  // 网格配置 - 更多格子，上下居中
+  private readonly GRID_COLS = 6;
+  private readonly GRID_ROWS = 7;
+  private readonly CELL_SIZE = 85;
+  private gridOffsetX: number = 0;
+  private gridOffsetY: number = 0;
 
   constructor() {
     super({ key: 'MergeScene' });
   }
 
   create(): void {
+    // 计算网格居中位置
+    const gridWidth = this.GRID_COLS * this.CELL_SIZE;
+    const gridHeight = this.GRID_ROWS * this.CELL_SIZE;
+    this.gridOffsetX = (GameConfig.WIDTH - gridWidth) / 2;
+    // 上下居中，考虑顶部UI(120px)和底部信息栏(100px)
+    const availableHeight = GameConfig.HEIGHT - 120 - 100;
+    this.gridOffsetY = 120 + (availableHeight - gridHeight) / 2;
+    
     // 创建漂亮的背景
     this.createBackground();
     
@@ -154,7 +162,7 @@ export class MergeScene extends Phaser.Scene {
     // 尝试加载存档
     if (!this.loadGame()) {
       // 没有存档，初始化新游戏
-      this.spawnWarehouse(2, 2);
+      this.spawnWarehouse(2, 3);
       this.spawnItem('wood1', 0, 0);
       this.spawnItem('wood1', 1, 0);
       this.spawnItem('stone1', 0, 1);
@@ -295,8 +303,8 @@ export class MergeScene extends Phaser.Scene {
     const gridHeight = this.GRID_ROWS * this.CELL_SIZE;
     graphics.fillStyle(0x000000, 0.25);
     graphics.fillRoundedRect(
-      this.GRID_OFFSET_X - 10, 
-      this.GRID_OFFSET_Y - 10, 
+      this.gridOffsetX - 10, 
+      this.gridOffsetY - 10, 
       gridWidth + 20, 
       gridHeight + 20, 
       15
@@ -305,8 +313,8 @@ export class MergeScene extends Phaser.Scene {
     // 绘制单元格
     for (let row = 0; row < this.GRID_ROWS; row++) {
       for (let col = 0; col < this.GRID_COLS; col++) {
-        const x = this.GRID_OFFSET_X + col * this.CELL_SIZE;
-        const y = this.GRID_OFFSET_Y + row * this.CELL_SIZE;
+        const x = this.gridOffsetX + col * this.CELL_SIZE;
+        const y = this.gridOffsetY + row * this.CELL_SIZE;
         
         // 单元格背景 (棋盘格效果)
         const isLight = (row + col) % 2 === 0;
@@ -325,8 +333,8 @@ export class MergeScene extends Phaser.Scene {
    */
   private getCellCenter(col: number, row: number): { x: number; y: number } {
     return {
-      x: this.GRID_OFFSET_X + col * this.CELL_SIZE + this.CELL_SIZE / 2,
-      y: this.GRID_OFFSET_Y + row * this.CELL_SIZE + this.CELL_SIZE / 2,
+      x: this.gridOffsetX + col * this.CELL_SIZE + this.CELL_SIZE / 2,
+      y: this.gridOffsetY + row * this.CELL_SIZE + this.CELL_SIZE / 2,
     };
   }
 
@@ -355,7 +363,7 @@ export class MergeScene extends Phaser.Scene {
     const container = this.add.container(pos.x, pos.y);
     
     // 卡片尺寸
-    const cardSize = 90;
+    const cardSize = 70;
     const halfCard = cardSize / 2;
     
     // 卡片背景 (带阴影效果)
@@ -380,7 +388,7 @@ export class MergeScene extends Phaser.Scene {
     
     // Emoji
     const emoji = this.add.text(0, 0, config.emoji, {
-      fontSize: '48px',
+      fontSize: '38px',
     }).setOrigin(0.5);
     container.add(emoji);
     
@@ -414,7 +422,7 @@ export class MergeScene extends Phaser.Scene {
     this.items.push(item);
     
     // 点击事件
-    container.setSize(90, 90);
+    container.setSize(70, 70);
     container.setInteractive({ useHandCursor: true });
     container.on('pointerdown', () => this.onItemClick(item));
     
