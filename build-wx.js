@@ -245,6 +245,27 @@ const adapterCode = `// 微信小游戏适配器
   _canvas.getBoundingClientRect = function() {
     return { top: 0, left: 0, width: screenWidth, height: screenHeight, x: 0, y: 0 };
   };
+
+  // MutationObserver 模拟
+  window.MutationObserver = function() {
+    this.observe = function() {};
+    this.disconnect = function() {};
+    this.takeRecords = function() { return []; };
+  };
+
+  // ResizeObserver 模拟
+  window.ResizeObserver = function() {
+    this.observe = function() {};
+    this.disconnect = function() {};
+    this.unobserve = function() {};
+  };
+
+  // IntersectionObserver 模拟
+  window.IntersectionObserver = function() {
+    this.observe = function() {};
+    this.disconnect = function() {};
+    this.unobserve = function() {};
+  };
 })();
 `;
 fs.writeFileSync('dist-wx/libs/weapp-adapter.js', adapterCode);
