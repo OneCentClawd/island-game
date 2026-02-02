@@ -296,10 +296,12 @@ if (fs.existsSync(distDir)) {
 
 // 创建入口文件
 console.log('📝 创建入口文件...');
-fs.writeFileSync('dist-wx/game.js', `// 确保 window 存在
-if (typeof window === 'undefined') {
-  var window = {};
-}
+fs.writeFileSync('dist-wx/game.js', `// 微信小游戏环境适配
+var window = window || GameGlobal;
+var global = global || GameGlobal;
+GameGlobal.window = window;
+GameGlobal.global = global;
+
 window.ontouchstart = true;
 window.ontouchmove = true;
 window.ontouchend = true;
