@@ -52,34 +52,50 @@ const adapterCode = `// 微信小游戏适配器
   var _canvas = _wx.createCanvas();
   var _sysInfo = _wx.getSystemInfoSync();
 
-  // 全局 window
-  if (typeof window === 'undefined') {
-    window = {};
-  }
-  
-  // 全局 document  
-  if (typeof document === 'undefined') {
-    document = {};
-  }
+  // 屏幕信息
+  var screenWidth = _sysInfo.windowWidth;
+  var screenHeight = _sysInfo.windowHeight;
+  var devicePixelRatio = _sysInfo.pixelRatio || 1;
 
-  // Canvas 和屏幕信息
+  // window 属性
   window.canvas = _canvas;
-  window.innerWidth = _sysInfo.windowWidth;
-  window.innerHeight = _sysInfo.windowHeight;
-  window.devicePixelRatio = _sysInfo.pixelRatio || 1;
+  window.innerWidth = screenWidth;
+  window.innerHeight = screenHeight;
+  window.devicePixelRatio = devicePixelRatio;
   window.screen = {
-    width: _sysInfo.windowWidth,
-    height: _sysInfo.windowHeight,
-    availWidth: _sysInfo.windowWidth,
-    availHeight: _sysInfo.windowHeight
+    width: screenWidth,
+    height: screenHeight,
+    availWidth: screenWidth,
+    availHeight: screenHeight
   };
 
   // 触摸支持检测 - Phaser 需要这个
-  window.ontouchstart = {};
-  window.ontouchmove = {};
-  window.ontouchend = {};
+  window.ontouchstart = true;
+  window.ontouchmove = true;
+  window.ontouchend = true;
 
-  // document 方法
+  // 伪造 body
+  var fakeBody = { 
+    appendChild: function(){}, 
+    removeChild: function(){}, 
+    insertBefore: function(){},
+    style: {},
+    clientWidth: screenWidth,
+    clientHeight: screenHeight
+  };
+
+  // 伪造 documentElement
+  var fakeDocElement = { 
+    style: {},
+    clientWidth: screenWidth,
+    clientHeight: screenHeight
+  };
+
+  // 伪造 head
+  var fakeHead = { appendChild: function(){}, removeChild: function(){} };
+
+  // 重写 document 方法
+  var origCreateElement = document.createElement;
   document.createElement = function(tagName) {
     tagName = (tagName || '').toLowerCase();
     if (tagName === 'canvas') {
@@ -87,6 +103,9 @@ const adapterCode = `// 微信小游戏适配器
       c.style = c.style || {};
       c.addEventListener = function() {};
       c.removeEventListener = function() {};
+      c.getBoundingClientRect = function() {
+        return { top: 0, left: 0, width: screenWidth, height: screenHeight };
+      };
       return c;
     }
     if (tagName === 'img' || tagName === 'image') {
@@ -95,13 +114,11 @@ const adapterCode = `// 微信小游戏适配器
         if (type === 'load') img.onload = cb;
         if (type === 'error') img.onerror = cb;
       };
+      img.removeEventListener = function() {};
       return img;
     }
     if (tagName === 'audio') {
       return _wx.createInnerAudioContext();
-    }
-    if (tagName === 'video') {
-      return { style: {}, play: function(){}, pause: function(){} };
     }
     return { 
       style: {}, 
@@ -109,14 +126,16 @@ const adapterCode = `// 微信小游戏适配器
       removeChild: function(){},
       addEventListener: function(){},
       removeEventListener: function(){},
-      classList: { add: function(){}, remove: function(){} }
+      classList: { add: function(){}, remove: function(){} },
+      getBoundingClientRect: function() { return { top: 0, left: 0, width: 0, height: 0 }; }
     };
   };
   
   document.getElementById = function() { return _canvas; };
   document.getElementsByTagName = function(tag) { 
     if (tag === 'canvas') return [_canvas];
-    if (tag === 'head') return [document.head];
+    if (tag === 'head') return [fakeHead];
+    if (tag === 'body') return [fakeBody];
     return []; 
   };
   document.getElementsByClassName = function() { return []; };
@@ -126,49 +145,30 @@ const adapterCode = `// 微信小游戏适配器
   };
   document.querySelectorAll = function() { return []; };
   document.createElementNS = function(ns, tag) { return document.createElement(tag); };
-  
-  document.body = { 
-    appendChild: function(){}, 
-    removeChild: function(){}, 
-    insertBefore: function(){},
-    style: {},
-    clientWidth: _sysInfo.windowWidth,
-    clientHeight: _sysInfo.windowHeight
-  };
-  document.documentElement = { 
-    style: {},
-    clientWidth: _sysInfo.windowWidth,
-    clientHeight: _sysInfo.windowHeight
-  };
-  document.head = { appendChild: function(){}, removeChild: function(){} };
-  document.readyState = 'complete';
+
+  // 用 defineProperty 设置只读属性
+  try {
+    Object.defineProperty(document, 'body', { get: function() { return fakeBody; }, configurable: true });
+    Object.defineProperty(document, 'documentElement', { get: function() { return fakeDocElement; }, configurable: true });
+    Object.defineProperty(document, 'head', { get: function() { return fakeHead; }, configurable: true });
+    Object.defineProperty(document, 'readyState', { get: function() { return 'complete'; }, configurable: true });
+  } catch(e) {
+    // 如果失败就忽略
+  }
 
   // window 属性
   window.document = document;
-  window.location = { href: '', protocol: 'https:', host: '' };
+  window.location = { href: 'game.js', protocol: 'https:', host: '', pathname: '/game.js', search: '', hash: '' };
   window.Image = function() { return document.createElement('img'); };
   window.Audio = function() { return _wx.createInnerAudioContext(); };
   window.HTMLElement = function() {};
   window.HTMLCanvasElement = function() {};
   window.HTMLImageElement = function() {};
   window.HTMLVideoElement = function() {};
-  window.FileReader = function() {};
+  window.FileReader = function() { this.readAsDataURL = function(){}; this.readAsArrayBuffer = function(){}; };
   window.FontFace = function() {};
   window.URL = { createObjectURL: function(){ return ''; }, revokeObjectURL: function(){} };
   window.Blob = function() {};
-  window.WebSocket = function() {};
-  window.XMLHttpRequest = function() {
-    var req = {
-      open: function(){},
-      send: function(){},
-      setRequestHeader: function(){},
-      readyState: 0,
-      status: 0,
-      responseText: '',
-      onreadystatechange: null
-    };
-    return req;
-  };
   
   // 事件
   window.addEventListener = function(type, listener, options) {
@@ -187,6 +187,8 @@ const adapterCode = `// 微信小游戏适配器
       changedTouches: e.changedTouches,
       touches: e.touches,
       timeStamp: e.timeStamp,
+      target: _canvas,
+      currentTarget: _canvas,
       preventDefault: function() {},
       stopPropagation: function() {}
     };
@@ -212,22 +214,23 @@ const adapterCode = `// 微信小游戏适配器
   window.close = function() {};
   window.scrollTo = function() {};
   window.scroll = function() {};
-  window.alert = function() {};
+  window.alert = function(msg) { _wx.showToast({ title: msg, icon: 'none' }); };
   window.open = function() { return null; };
   window.getComputedStyle = function(el) { 
     return { 
       getPropertyValue: function() { return ''; },
-      width: el && el.width ? el.width + 'px' : '0px',
-      height: el && el.height ? el.height + 'px' : '0px'
+      width: (el && el.width ? el.width : screenWidth) + 'px',
+      height: (el && el.height ? el.height : screenHeight) + 'px'
     }; 
   };
-  window.matchMedia = function() { return { matches: false, addListener: function(){} }; };
+  window.matchMedia = function() { return { matches: false, addListener: function(){}, removeListener: function(){} }; };
   window.navigator = { 
     userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) wxgame',
     language: 'zh-CN',
     platform: 'iPhone',
     appVersion: '5.0',
-    maxTouchPoints: 10
+    maxTouchPoints: 10,
+    onLine: true
   };
   
   // Performance
@@ -238,10 +241,10 @@ const adapterCode = `// 微信小游戏适配器
     getEntriesByName: function() { return []; }
   };
 
-  // console 保持原样
-  if (typeof console === 'undefined') {
-    console = { log: function(){}, warn: function(){}, error: function(){} };
-  }
+  // 主 canvas 设置
+  _canvas.getBoundingClientRect = function() {
+    return { top: 0, left: 0, width: screenWidth, height: screenHeight, x: 0, y: 0 };
+  };
 })();
 `;
 fs.writeFileSync('dist-wx/libs/weapp-adapter.js', adapterCode);
