@@ -112,8 +112,11 @@ export class AssetGenerator {
     // 彩虹圆环
     const ringWidth = 6;
     colors.forEach((color, i) => {
-      graphics.lineStyle(ringWidth, color, 1);
-      graphics.strokeCircle(size / 2, size / 2, size / 2 - 4 - i * ringWidth);
+      const radius = size / 2 - 4 - i * ringWidth;
+      if (radius > 0) {  // 确保半径为正
+        graphics.lineStyle(ringWidth, color, 1);
+        graphics.strokeCircle(size / 2, size / 2, radius);
+      }
     });
     
     // 中心星星
