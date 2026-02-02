@@ -447,6 +447,14 @@ export class MergeScene extends Phaser.Scene {
     const mergeInto = item1.config.mergeInto;
     if (!mergeInto) return;
     
+    // 检查体力
+    if (!saveManager.useEnergy(1)) {
+      this.showInfo('❌ 体力不足！');
+      this.deselectItem();
+      return;
+    }
+    this.updateEnergyUI();
+    
     const targetPos = { x: item2.x, y: item2.y };
     
     // 移动动画
@@ -488,6 +496,13 @@ export class MergeScene extends Phaser.Scene {
    * 点击仓库
    */
   private onWarehouseClick(warehouse: PlacedItem): void {
+    // 检查体力
+    if (!saveManager.useEnergy(1)) {
+      this.showInfo('❌ 体力不足！');
+      return;
+    }
+    this.updateEnergyUI();
+    
     // 找空位
     const empty = this.findEmptyCell();
     if (!empty) {
@@ -641,6 +656,14 @@ export class MergeScene extends Phaser.Scene {
    */
   private showInfo(text: string): void {
     this.infoText.setText(text);
+  }
+
+  /**
+   * 更新体力UI
+   */
+  private updateEnergyUI(): void {
+    const energy = saveManager.getEnergy();
+    this.energyText.setText(`⚡ ${energy}`);
   }
 
   /**
