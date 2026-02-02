@@ -113,6 +113,7 @@ interface PlacedItem {
   x: number;
   y: number;
   container: Phaser.GameObjects.Container;
+  lastClickTime?: number;  // 用于双击检测
 }
 
 /**
@@ -323,10 +324,19 @@ export class MergeScene extends Phaser.Scene {
       return;
     }
     
-    // 金币点击 - 收集
+    // 金币特殊处理 - 双击收集，单击可合成
     if (item.config.value) {
-      this.collectCoin(item);
-      return;
+      const now = Date.now();
+      const lastClick = item.lastClickTime || 0;
+      item.lastClickTime = now;
+      
+      // 双击检测（300ms内）
+      if (now - lastClick < 300) {
+        this.collectCoin(item);
+        return;
+      }
+      
+      // 单击 - 和普通物品一样可以选中/合成
     }
     
     // 如果没有选中 - 选中这个
