@@ -11,6 +11,7 @@ export class PreloadScene extends Phaser.Scene {
   }
 
   preload(): void {
+    console.log('PreloadScene preload!');
     // 创建加载进度UI
     this.createLoadingUI();
   }
@@ -54,6 +55,7 @@ export class PreloadScene extends Phaser.Scene {
   }
 
   create(): void {
+    console.log('PreloadScene create!');
     // 生成所有游戏素材
     AssetGenerator.generateAll(this);
 
