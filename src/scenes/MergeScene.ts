@@ -53,10 +53,10 @@ const ITEMS: { [key: string]: ItemConfig } = {
  * 仓库可以吐出的物品（权重）
  */
 const WAREHOUSE_DROPS: { key: string; weight: number }[] = [
-  { key: 'wood1', weight: 30 },
-  { key: 'stone1', weight: 30 },
+  { key: 'wood1', weight: 35 },
+  { key: 'stone1', weight: 35 },
   { key: 'food1', weight: 25 },
-  { key: 'coin1', weight: 15 },
+  { key: 'coin1', weight: 5 },  // 金币稀有
 ];
 
 /**
