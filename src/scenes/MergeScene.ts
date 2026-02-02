@@ -198,7 +198,7 @@ export class MergeScene extends Phaser.Scene {
       bg.fillRect(0, y, GameConfig.WIDTH, 1);
     }
     
-    // ===== 天空区域装饰 (y: 130-250, 资源框下方) =====
+    // ===== 天空装饰 (y: 130-250) =====
     this.add.text(50, 140, '☁️', { fontSize: '45px' }).setAlpha(0.6);
     this.add.text(280, 160, '☁️', { fontSize: '35px' }).setAlpha(0.5);
     this.add.text(550, 135, '☁️', { fontSize: '40px' }).setAlpha(0.55);
@@ -207,33 +207,69 @@ export class MergeScene extends Phaser.Scene {
     this.add.text(650, 180, '☀️', { fontSize: '50px' }).setAlpha(0.8);
     this.add.text(380, 220, '🐦', { fontSize: '20px' }).setAlpha(0.5);
     
-    // ===== 草地区域装饰 (y > 640, 避开网格和底部提示框) =====
-    // 网格大约在 x:100-620, 底部提示框在 y:1180+
+    // ===== 草地装饰 (遍布整个绿色区域 y: 640-1280) =====
     
-    // 左侧草地 (x: 0-90)
-    this.add.text(15, 660, '🌳', { fontSize: '50px' }).setAlpha(0.8);
-    this.add.text(30, 750, '🌷', { fontSize: '24px' }).setAlpha(0.7);
-    this.add.text(10, 820, '🌻', { fontSize: '28px' }).setAlpha(0.7);
-    this.add.text(40, 900, '🐿️', { fontSize: '24px' }).setAlpha(0.7);
-    this.add.text(5, 970, '🌲', { fontSize: '55px' }).setAlpha(0.8);
-    this.add.text(35, 1050, '🍄', { fontSize: '26px' }).setAlpha(0.7);
-    this.add.text(15, 1110, '🌸', { fontSize: '24px' }).setAlpha(0.6);
+    // 大树 - 分散在各处
+    this.add.text(20, 660, '🌳', { fontSize: '55px' }).setAlpha(0.85);
+    this.add.text(650, 700, '🌴', { fontSize: '58px' }).setAlpha(0.85);
+    this.add.text(350, 880, '🌲', { fontSize: '50px' }).setAlpha(0.7);
+    this.add.text(100, 950, '🌳', { fontSize: '48px' }).setAlpha(0.75);
+    this.add.text(580, 920, '🌴', { fontSize: '52px' }).setAlpha(0.75);
+    this.add.text(250, 1050, '🌲', { fontSize: '45px' }).setAlpha(0.7);
+    this.add.text(480, 1080, '🌳', { fontSize: '50px' }).setAlpha(0.7);
+    this.add.text(15, 1100, '🌴', { fontSize: '55px' }).setAlpha(0.8);
+    this.add.text(680, 1060, '🌲', { fontSize: '48px' }).setAlpha(0.75);
     
-    // 右侧草地 (x: 630-720)
-    this.add.text(650, 680, '🌴', { fontSize: '52px' }).setAlpha(0.8);
-    this.add.text(670, 770, '🦋', { fontSize: '26px' }).setAlpha(0.7);
-    this.add.text(640, 840, '🌺', { fontSize: '26px' }).setAlpha(0.7);
-    this.add.text(665, 920, '🐰', { fontSize: '26px' }).setAlpha(0.7);
-    this.add.text(635, 990, '🌳', { fontSize: '48px' }).setAlpha(0.8);
-    this.add.text(680, 1060, '🌼', { fontSize: '24px' }).setAlpha(0.7);
-    this.add.text(650, 1120, '🍀', { fontSize: '22px' }).setAlpha(0.6);
+    // 花朵 - 点缀各处
+    this.add.text(80, 680, '🌸', { fontSize: '22px' }).setAlpha(0.7);
+    this.add.text(200, 720, '🌷', { fontSize: '24px' }).setAlpha(0.7);
+    this.add.text(450, 660, '🌻', { fontSize: '26px' }).setAlpha(0.7);
+    this.add.text(600, 750, '🌺', { fontSize: '24px' }).setAlpha(0.7);
+    this.add.text(320, 780, '🌼', { fontSize: '22px' }).setAlpha(0.65);
+    this.add.text(50, 850, '🌷', { fontSize: '20px' }).setAlpha(0.65);
+    this.add.text(180, 900, '🌸', { fontSize: '24px' }).setAlpha(0.65);
+    this.add.text(420, 940, '🌺', { fontSize: '22px' }).setAlpha(0.6);
+    this.add.text(550, 1000, '🌻', { fontSize: '24px' }).setAlpha(0.6);
+    this.add.text(70, 1020, '🌼', { fontSize: '22px' }).setAlpha(0.6);
+    this.add.text(300, 1100, '🌷', { fontSize: '20px' }).setAlpha(0.55);
+    this.add.text(620, 1130, '🌸', { fontSize: '22px' }).setAlpha(0.55);
+    this.add.text(150, 1150, '🌺', { fontSize: '24px' }).setAlpha(0.5);
+    this.add.text(500, 1170, '🌼', { fontSize: '20px' }).setAlpha(0.5);
     
-    // 底部中间草地 (网格下方, y: 870-1150, x: 100-620)
-    this.add.text(150, 890, '🌱', { fontSize: '22px' }).setAlpha(0.5);
-    this.add.text(550, 900, '🌿', { fontSize: '24px' }).setAlpha(0.5);
-    this.add.text(250, 1100, '🐝', { fontSize: '20px' }).setAlpha(0.5);
-    this.add.text(450, 1110, '🦜', { fontSize: '22px' }).setAlpha(0.5);
-    this.add.text(350, 1130, '🌾', { fontSize: '24px' }).setAlpha(0.4);
+    // 草和植物 - 遍布地面
+    this.add.text(130, 670, '🌿', { fontSize: '20px' }).setAlpha(0.5);
+    this.add.text(280, 690, '🌱', { fontSize: '18px' }).setAlpha(0.5);
+    this.add.text(520, 680, '🍀', { fontSize: '20px' }).setAlpha(0.5);
+    this.add.text(380, 730, '🌾', { fontSize: '22px' }).setAlpha(0.45);
+    this.add.text(60, 780, '🌿', { fontSize: '18px' }).setAlpha(0.5);
+    this.add.text(240, 830, '🍀', { fontSize: '20px' }).setAlpha(0.45);
+    this.add.text(480, 800, '🌱', { fontSize: '18px' }).setAlpha(0.45);
+    this.add.text(620, 860, '🌾', { fontSize: '20px' }).setAlpha(0.45);
+    this.add.text(150, 970, '🌿', { fontSize: '22px' }).setAlpha(0.4);
+    this.add.text(350, 1010, '🍀', { fontSize: '18px' }).setAlpha(0.4);
+    this.add.text(550, 1050, '🌱', { fontSize: '20px' }).setAlpha(0.4);
+    this.add.text(80, 1130, '🌾', { fontSize: '22px' }).setAlpha(0.35);
+    this.add.text(400, 1160, '🌿', { fontSize: '18px' }).setAlpha(0.35);
+    this.add.text(680, 1180, '🍀', { fontSize: '20px' }).setAlpha(0.35);
+    
+    // 蘑菇 - 散落
+    this.add.text(40, 730, '🍄', { fontSize: '22px' }).setAlpha(0.6);
+    this.add.text(300, 860, '🍄', { fontSize: '20px' }).setAlpha(0.55);
+    this.add.text(580, 970, '🍄', { fontSize: '22px' }).setAlpha(0.5);
+    this.add.text(200, 1080, '🍄', { fontSize: '18px' }).setAlpha(0.45);
+    this.add.text(450, 1120, '🍄', { fontSize: '20px' }).setAlpha(0.4);
+    
+    // 小动物 - 点缀生机
+    this.add.text(120, 700, '🦋', { fontSize: '20px' }).setAlpha(0.6);
+    this.add.text(400, 750, '🐝', { fontSize: '18px' }).setAlpha(0.55);
+    this.add.text(550, 820, '🐿️', { fontSize: '22px' }).setAlpha(0.6);
+    this.add.text(80, 890, '🐰', { fontSize: '24px' }).setAlpha(0.6);
+    this.add.text(320, 950, '🦋', { fontSize: '18px' }).setAlpha(0.5);
+    this.add.text(620, 1010, '🐝', { fontSize: '20px' }).setAlpha(0.5);
+    this.add.text(180, 1060, '🐿️', { fontSize: '20px' }).setAlpha(0.5);
+    this.add.text(480, 1140, '🐰', { fontSize: '22px' }).setAlpha(0.45);
+    this.add.text(650, 1200, '🦋', { fontSize: '18px' }).setAlpha(0.4);
+    this.add.text(50, 1180, '🐦', { fontSize: '20px' }).setAlpha(0.4);
   }
 
   /**
